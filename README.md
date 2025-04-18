@@ -15,17 +15,17 @@ This repository serves as a child module for managing Postgres Logical Databases
 ```terraform
 provider "postgresql" {
   scheme    = "postgres"
-  host      = var.db_hostname
-  username  = var.db_username
-  port      = var.db_port
-  password  = var.db_password
-  superuser = var.db_superuser
-  sslmode   = var.db_sslmode
+  host      = "localhost"
+  username  = "admin_user"
+  port      = 5432
+  password  = "demo-only-password"
+  superuser = false
+  sslmode   = "disable"
 }
 
 module "logical_dbs" {
-  source = "https://github.com/masterpointio/terraform-postgres-logical-dbs"
-  # Masterpoint highly suggests pinning every module to a specific version
+  source = "git::https://github.com/masterpointio/terraform-postgres-logical-dbs.git"
+  # Masterpoint recommends pinning every module to a specific version
   # version     = "x.x.x"
 
   databases = [
