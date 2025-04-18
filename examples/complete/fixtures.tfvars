@@ -1,7 +1,7 @@
 # complete/fixtures.tfvars
 
 # postgres shell command to create this user:
-# CREATE ROLE admin_user LOGIN CREATEDB CREATEROLE PASSWORD 'insecure-pass-for-demo';
+# CREATE ROLE admin_user LOGIN CREATEDB PASSWORD 'insecure-pass-for-demo';
 db_username = "admin_user"
 db_password = "insecure-pass-for-demo"
 
