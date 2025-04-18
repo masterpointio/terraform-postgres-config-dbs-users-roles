@@ -20,6 +20,11 @@ variable "db_port" {
   description = "The port of the database instance."
 }
 
+variable "db_scheme" {
+  type        = string
+  description = "The scheme of the database instance."
+}
+
 variable "databases" {
   type = list(object({
     name             = string

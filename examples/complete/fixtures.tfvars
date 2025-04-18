@@ -5,6 +5,7 @@
 db_username = "admin_user"
 db_password = "insecure-pass-for-demo"
 
+db_scheme   = "postgres"
 db_hostname = "localhost"
 db_port     = 5432
 
