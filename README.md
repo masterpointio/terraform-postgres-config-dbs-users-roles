@@ -12,7 +12,7 @@ This repository serves as a child module for managing Postgres Logical Databases
 
 ## Usage
 
-```
+```terraform
 provider "postgresql" {
   scheme    = "postgres"
   host      = var.db_hostname
