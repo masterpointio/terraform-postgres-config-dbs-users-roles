@@ -6,6 +6,6 @@ provider "postgresql" {
   username  = var.db_username
   port      = var.db_port
   password  = var.db_password
-  superuser = false
-  sslmode   = "disable"
+  superuser = var.db_superuser
+  sslmode   = var.db_sslmode
 }

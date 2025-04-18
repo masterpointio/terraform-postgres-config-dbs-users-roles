@@ -25,6 +25,16 @@ variable "db_scheme" {
   description = "The scheme of the database instance."
 }
 
+variable "db_superuser" {
+  type        = bool
+  description = "Whether the database instance is a superuser."
+}
+
+variable "db_sslmode" {
+  type        = string
+  description = "The SSL mode of the database instance."
+}
+
 variable "databases" {
   type = list(object({
     name             = string
