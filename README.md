@@ -165,11 +165,8 @@ Copyright © 2016-2025 [Masterpoint Consulting LLC](https://masterpoint.io/)
 [newsletter-url]: https://newsletter.masterpoint.io/
 [youtube-badge]: https://img.shields.io/badge/YouTube-Subscribe-D191BF?style=for-the-badge&logo=youtube&logoColor=white
 [youtube-url]: https://www.youtube.com/channel/UCeeDaO2NREVlPy9Plqx-9JQ
-
-<!-- TODO: Replace `terraform-module-template` with your actual repository name. -->
-
-[release-badge]: https://img.shields.io/github/v/release/masterpointio/terraform-module-template?color=0E383A&label=Release&style=for-the-badge&logo=github&logoColor=white
-[latest-release]: https://github.com/masterpointio/terraform-module-template/releases/latest
-[contributors-image]: https://contrib.rocks/image?repo=masterpointio/terraform-module-template
-[contributors-url]: https://github.com/masterpointio/terraform-module-template/graphs/contributors
-[issues-url]: https://github.com/masterpointio/terraform-module-template/issues
+[release-badge]: https://img.shields.io/github/v/release/masterpointio/terraform-postgres-logical-dbs?color=0E383A&label=Release&style=for-the-badge&logo=github&logoColor=white
+[latest-release]: https://github.com/masterpointio/terraform-postgres-logical-dbs/releases/latest
+[contributors-image]: https://contrib.rocks/image?repo=masterpointio/terraform-postgres-logical-dbs
+[contributors-url]: https://github.com/masterpointio/terraform-postgres-logical-dbs/graphs/contributors
+[issues-url]: https://github.com/masterpointio/terraform-postgres-logical-dbs/issues
