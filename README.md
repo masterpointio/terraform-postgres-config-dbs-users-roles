@@ -102,9 +102,7 @@ TODO - do we need this seciton? If so, what's missing that I should fill in?
 
 ## Outputs
 
-| Name                                                                 | Description |
-| -------------------------------------------------------------------- | ----------- |
-| <a name="output_logical_dbs"></a> [logical_dbs](#output_logical_dbs) | n/a         |
+No outputs.
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
