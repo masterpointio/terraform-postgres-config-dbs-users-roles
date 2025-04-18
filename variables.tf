@@ -1,5 +1,7 @@
-variable "length" {
-  description = "The length of the random name"
-  type        = number
-  default     = 2
+variable "databases" {
+  type = list(object({
+    name             = string
+    connection_limit = optional(number)
+  }))
+  description = "The logical database to create and configure"
 }

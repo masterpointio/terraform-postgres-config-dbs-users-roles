@@ -1,0 +1,22 @@
+# postgres shell command to create this user:
+# CREATE ROLE admin_user LOGIN CREATEDB CREATEROLE PASSWORD 'insecure-pass-for-demo';
+db_username = "admin_user"
+db_password = "insecure-pass-for-demo"
+
+db_hostname = "localhost"
+db_port     = 5432
+
+databases = [
+  {
+    name             = "app1_db"
+    connection_limit = 10
+  },
+  {
+    name             = "app2_db"
+    connection_limit = 20
+  },
+  {
+    name             = "app3_db"
+    connection_limit = 30
+  }
+]

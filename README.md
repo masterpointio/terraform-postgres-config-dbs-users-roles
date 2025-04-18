@@ -1,6 +1,6 @@
 [![Banner][banner-image]](https://masterpoint.io/)
 
-# terraform-module-template
+# terraform-postgres-logical-dbs
 
 [![Release][release-badge]][latest-release]
 
@@ -8,9 +8,35 @@
 
 ## Purpose and Functionality
 
-This repository serves as a template for creating Terraform modules, providing a standardized structure and essential files for efficient module development. It's designed to ensure consistency and our best practices across Terraform projects.
+This repository serves as a child module for managing Postgres Logical Databases.
 
 ## Usage
+
+```
+provider "postgresql" {
+  scheme    = "postgres"
+  host      = var.db_hostname
+  username  = var.db_username
+  port      = var.db_port
+  password  = var.db_password
+  superuser = false
+  sslmode   = "disable"
+}
+
+module "logical_dbs" {
+  source = "x"
+  databases = [
+        {
+            name = "app1_db"
+            connection_limit = 10
+        },
+        {
+            name = "app2_db"
+            connection_limit = 20
+        }
+    ]
+}
+```
 
 ### Prerequisites (optional)
 

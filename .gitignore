@@ -8,6 +8,7 @@
 
 # Local .terraform directories
 **/.terraform/*
+examples/**/.terraform.lock.hcl
 
 # IDE/Editor settings
 **/.idea
