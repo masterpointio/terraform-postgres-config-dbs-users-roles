@@ -1,4 +1,5 @@
-# complete.tf
+# complete/variables.tf
+
 variable "db_hostname" {
   type        = string
   description = "The hostname of the database instance."

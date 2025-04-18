@@ -1,4 +1,4 @@
-# complete.tf
+# complete/main.tf
 
 module "app_dbs" {
   source = "../../"

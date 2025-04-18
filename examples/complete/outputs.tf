@@ -1,4 +1,4 @@
-# complete.tf
+# complete/outputs.tf
 
 output "logical_dbs" {
   value = {

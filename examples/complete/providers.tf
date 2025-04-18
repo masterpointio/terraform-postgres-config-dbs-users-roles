@@ -1,3 +1,5 @@
+# complete/providers.tf
+
 provider "postgresql" {
   scheme    = "postgres" # awspostgres does not work with sslmode=disable
   host      = var.db_hostname
