@@ -41,9 +41,14 @@ module "logical_dbs" {
 }
 ```
 
-### Prerequisites (optional)
+### Prerequisites
 
-To use this terraform module, you'll need to have a postgres user capable of (1) logging into the Postgres server, and (2) creating Postgres databses. There are Postgres CLI commands for creating a user with these privileges - see `examples/complete/fixtures.tfvars`.
+To use this terraform module, you'll need to have a postgres user capable of,
+
+- logging into the Postgres server
+- creating Postgres databses.
+
+There are example Postgres CLI commands for creating a user with these privileges in `examples/complete/fixtures.tfvars`.
 
 ### Step-by-Step Instructions
 
