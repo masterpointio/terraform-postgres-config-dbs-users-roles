@@ -52,8 +52,7 @@ There are example Postgres CLI commands for creating a user with these privilege
 
 ### Step-by-Step Instructions
 
-TODO - do we need this seciton? If so, what's missing that I should fill in?
-
+TODO - do we need this section? If so, what's missing that I should fill in?
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Requirements
