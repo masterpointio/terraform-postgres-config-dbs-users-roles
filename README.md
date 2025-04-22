@@ -60,13 +60,14 @@ TODO - do we need this section? If so, what's missing that I should fill in?
 | --------------------------------------------------------------------------- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement_terraform)    | ~> 1    |
 | <a name="requirement_postgresql"></a> [postgresql](#requirement_postgresql) | ~> 1    |
+| <a name="requirement_random"></a> [random](#requirement_random)             | ~> 3    |
 
 ## Providers
 
 | Name                                                                  | Version |
 | --------------------------------------------------------------------- | ------- |
 | <a name="provider_postgresql"></a> [postgresql](#provider_postgresql) | ~> 1    |
-| <a name="provider_random"></a> [random](#provider_random)             | n/a     |
+| <a name="provider_random"></a> [random](#provider_random)             | ~> 3    |
 
 ## Modules
 
