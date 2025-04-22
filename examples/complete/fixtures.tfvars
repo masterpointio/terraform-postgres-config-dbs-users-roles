@@ -24,7 +24,7 @@ roles = [
       name      = "app1_app_user"
       login     = true
       superuser = false
-      password  = "securepassword1"
+      password  = "insecure-pass-for-demo-app"
     }
 
     table_grants = {
@@ -52,22 +52,12 @@ roles = [
       objects     = [] # empty list to grant all sequences
       privileges  = ["ALL"]
     }
-
-    default_privileges = [{
-      role        = "app1_app_user"
-      database    = "app1_db"
-      schema      = "public"
-      owner       = "app1_app_user"
-      object_type = "table"
-      objects     = [] # empty list to grant all tables
-      privileges  = ["DELETE", "INSERT", "REFERENCES", "SELECT", "TRIGGER", "TRUNCATE", "UPDATE"]
-    }]
   },
   {
     role = {
       name      = "app1_readonly_user"
       login     = true
-      password  = "readonlypassword1"
+      password  = "insecure-pass-for-demo-readonly"
       superuser = false
     }
 
