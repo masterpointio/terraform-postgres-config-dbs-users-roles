@@ -1,4 +1,4 @@
-[![Banner][banner-image]](https://masterpoint.io/)
+![Banner][banner-image]](https://masterpoint.io/)
 
 # terraform-postgres-logical-dbs
 
