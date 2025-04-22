@@ -32,7 +32,7 @@ provider "postgresql" {
 }
 
 module "logical_dbs" {
-  source = "git::https://github.com/masterpointio/terraform-postgres-dbs-roles.git?ref=main"
+  source = "git::https://github.com/masterpointio/terraform-postgres-admin.git?ref=main"
 
   databases = [
     {
