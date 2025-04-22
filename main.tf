@@ -41,8 +41,6 @@ resource "random_password" "user_password" {
 # In Postgres 15, now new users cannot create tables or write data to Postgres public schema by default. You have to grant create privilege to the new user manually.
 # https://www.postgresql.org/docs/current/ddl-priv.html#DDL-PRIV-CREATE
 resource "postgresql_role" "role" {
-  depends_on = [postgresql_database.logical_db]
-
   for_each = { for role in local.roles_with_passwords : role.role.name => role }
 
   name                      = each.value.role.name
@@ -63,6 +61,8 @@ resource "postgresql_role" "role" {
   skip_reassign_owned       = each.value.role.skip_reassign_owned
   statement_timeout         = each.value.role.statement_timeout
   assume_role               = each.value.role.assume_role
+
+  depends_on = [postgresql_database.logical_db]
 }
 
 resource "postgresql_grant" "database_access" {
@@ -73,6 +73,8 @@ resource "postgresql_grant" "database_access" {
   database    = each.value.database
   object_type = each.value.object_type
   privileges  = each.value.privileges
+
+  depends_on = [postgresql_database.logical_db]
 }
 
 resource "postgresql_grant" "schema_access" {
@@ -84,6 +86,8 @@ resource "postgresql_grant" "schema_access" {
   schema      = each.value.schema
   object_type = each.value.object_type
   privileges  = each.value.privileges
+
+  depends_on = [postgresql_database.logical_db]
 }
 
 resource "postgresql_grant" "table_access" {
@@ -96,6 +100,8 @@ resource "postgresql_grant" "table_access" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
   objects     = each.value.objects
+
+  depends_on = [postgresql_database.logical_db]
 }
 
 resource "postgresql_grant" "sequence_access" {
@@ -107,6 +113,8 @@ resource "postgresql_grant" "sequence_access" {
   schema      = each.value.schema
   object_type = each.value.object_type
   privileges  = each.value.privileges
+
+  depends_on = [postgresql_database.logical_db]
 }
 
 resource "postgresql_default_privileges" "privileges" {
@@ -119,4 +127,6 @@ resource "postgresql_default_privileges" "privileges" {
   owner       = each.value.owner
   object_type = each.value.object_type
   privileges  = each.value.privileges
+
+  depends_on = [postgresql_database.logical_db]
 }

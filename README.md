@@ -1,6 +1,6 @@
 ![Banner][banner-image]](https://masterpoint.io/)
 
-# terraform-postgres-logical-dbs
+# terraform-postgres-dbs-roles
 
 [![Release][release-badge]][latest-release]
 
@@ -8,11 +8,19 @@
 
 ## Purpose and Functionality
 
-This repository serves as a child module for managing Postgres Logical Databases.
+This repository serves as a child module for managing Postgres Logical Databases and Roles
 
 ## Usage
 
-```terraform
+### Prerequisites
+
+1. Postgres user with `LOGIN` privileges
+
+### Example
+
+Please see [examples/complete] for a working example.
+
+```hcl
 provider "postgresql" {
   scheme    = "postgres"
   host      = "localhost"
@@ -24,34 +32,102 @@ provider "postgresql" {
 }
 
 module "logical_dbs" {
-  source = "git::https://github.com/masterpointio/terraform-postgres-logical-dbs.git"
-  # Masterpoint recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  source = "git::https://github.com/masterpointio/terraform-postgres-dbs-roles.git?ref=main"
 
   databases = [
     {
-      name = "app1_db"
-      connection_limit = 10
-    },
-    {
-      name = "app2_db"
-      connection_limit = 20
+      name = "app"
+      connection_limit = -1
     }
   ]
+
+  roles = [
+  {
+    role = {
+      name      = "system_user"
+      login     = true
+      superuser = false
+      password  = "insecure-pass-for-demo-app"
+    }
+
+    table_grants = {
+      role        = "system_user"
+      database    = "app"
+      schema      = "public"
+      object_type = "table"
+      objects     = [] # empty list to grant all tables
+      privileges  = ["ALL"]
+    }
+
+    schema_grants = {
+      role        = "system_user"
+      database    = "app"
+      schema      = "public"
+      object_type = "schema"
+      privileges  = ["USAGE", "CREATE"]
+    }
+
+    sequence_grants = {
+      role        = "system_user"
+      database    = "app"
+      schema      = "public"
+      object_type = "sequence"
+      objects     = [] # empty list to grant all sequences
+      privileges  = ["ALL"]
+    }
+  },
+  {
+    role = {
+      name      = "readonly_user"
+      login     = true
+      password  = "insecure-pass-for-demo-readonly"
+      superuser = false
+    }
+
+    table_grants = {
+      role        = "readonly_user"
+      database    = "app"
+      schema      = "public"
+      object_type = "table"
+      objects     = [] # empty list to grant all tables
+      privileges  = ["SELECT"]
+    }
+
+    sequence_grants = {
+      role        = "readonly_user"
+      database    = "app"
+      schema      = "public"
+      object_type = "sequence"
+      objects     = [] # empty list to grant all sequences
+      privileges  = ["USAGE", "SELECT"]
+    }
+
+    default_privileges = [
+      {
+        role        = "readonly_user"
+        database    = "app"
+        schema      = "public"
+        owner       = "system_user"
+        object_type = "table"
+        objects     = [] # empty list to grant all tables
+        privileges  = ["SELECT"]
+      },
+      {
+        role        = "readonly_user"
+        database    = "app"
+        schema      = "public"
+        owner       = "system_user"
+        object_type = "sequence"
+        objects     = [] # empty list to grant all sequences
+        privileges  = ["USAGE", "SELECT"]
+      },
+    ]
+  }
+]
+
 }
 ```
 
-### Prerequisites
-
-To use this terraform module, you'll need to have a postgres user capable of,
-
-- logging into the Postgres server
-- creating Postgres databases.
-There are example Postgres CLI commands for creating a user with these privileges in `examples/complete/fixtures.tfvars`.
-
-### Step-by-Step Instructions
-
-TODO - do we need this section? If so, what's missing that I should fill in?
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Requirements

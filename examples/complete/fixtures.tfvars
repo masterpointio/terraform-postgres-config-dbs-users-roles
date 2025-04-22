@@ -13,7 +13,7 @@ db_sslmode   = "disable"
 
 databases = [
   {
-    name             = "app1_db"
+    name             = "app"
     connection_limit = 10
   }
 ]
@@ -21,15 +21,15 @@ databases = [
 roles = [
   {
     role = {
-      name      = "app1_app_user"
+      name      = "system_user"
       login     = true
       superuser = false
       password  = "insecure-pass-for-demo-app"
     }
 
     table_grants = {
-      role        = "app1_app_user"
-      database    = "app1_db"
+      role        = "system_user"
+      database    = "app"
       schema      = "public"
       object_type = "table"
       objects     = [] # empty list to grant all tables
@@ -37,16 +37,16 @@ roles = [
     }
 
     schema_grants = {
-      role        = "app1_app_user"
-      database    = "app1_db"
+      role        = "system_user"
+      database    = "app"
       schema      = "public"
       object_type = "schema"
       privileges  = ["USAGE", "CREATE"]
     }
 
     sequence_grants = {
-      role        = "app1_app_user"
-      database    = "app1_db"
+      role        = "system_user"
+      database    = "app"
       schema      = "public"
       object_type = "sequence"
       objects     = [] # empty list to grant all sequences
@@ -55,15 +55,15 @@ roles = [
   },
   {
     role = {
-      name      = "app1_readonly_user"
+      name      = "readonly_user"
       login     = true
       password  = "insecure-pass-for-demo-readonly"
       superuser = false
     }
 
     table_grants = {
-      role        = "app1_readonly_user"
-      database    = "app1_db"
+      role        = "readonly_user"
+      database    = "app"
       schema      = "public"
       object_type = "table"
       objects     = [] # empty list to grant all tables
@@ -71,8 +71,8 @@ roles = [
     }
 
     sequence_grants = {
-      role        = "app1_readonly_user"
-      database    = "app1_db"
+      role        = "readonly_user"
+      database    = "app"
       schema      = "public"
       object_type = "sequence"
       objects     = [] # empty list to grant all sequences
@@ -81,19 +81,19 @@ roles = [
 
     default_privileges = [
       {
-        role        = "app1_readonly_user"
-        database    = "app1_db"
+        role        = "readonly_user"
+        database    = "app"
         schema      = "public"
-        owner       = "app1_app_user"
+        owner       = "system_user"
         object_type = "table"
         objects     = [] # empty list to grant all tables
         privileges  = ["SELECT"]
       },
       {
-        role        = "app1_readonly_user"
-        database    = "app1_db"
+        role        = "readonly_user"
+        database    = "app"
         schema      = "public"
-        owner       = "app1_app_user"
+        owner       = "system_user"
         object_type = "sequence"
         objects     = [] # empty list to grant all sequences
         privileges  = ["USAGE", "SELECT"]
