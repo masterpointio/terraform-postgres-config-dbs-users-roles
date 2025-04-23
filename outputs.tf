@@ -1,3 +1,7 @@
+output "databases" {
+  value = postgresql_database.logical_db
+}
+
 output "database_access" {
   value = postgresql_grant.database_access
 }

@@ -47,7 +47,7 @@ module "logical_dbs" {
       name      = "system_user"
       login     = true
       superuser = false
-      password  = "insecure-pass-for-demo-app"
+      password  = "insecure-pass-for-readme-app"
     }
 
     table_grants = {
@@ -80,7 +80,7 @@ module "logical_dbs" {
     role = {
       name      = "readonly_user"
       login     = true
-      password  = "insecure-pass-for-demo-readonly"
+      password  = "insecure-pass-for-readme-readonly"
       superuser = false
     }
 

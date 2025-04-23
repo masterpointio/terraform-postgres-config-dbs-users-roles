@@ -1,10 +1,3 @@
-resource "postgresql_database" "logical_db" {
-  for_each         = { for database in var.databases : database.name => database }
-  name             = each.key
-  connection_limit = each.value.connection_limit
-}
-
-
 locals {
   roles_with_passwords = [for idx, role_data in var.roles : merge(role_data,
     {
@@ -25,6 +18,12 @@ locals {
   _schema_grants      = [for role in local.roles_with_passwords : role.schema_grants if try(role.schema_grants, null) != null]
   _sequence_grants    = [for role in local.roles_with_passwords : role.sequence_grants if try(role.sequence_grants, null) != null]
   _table_grants       = [for role in local.roles_with_passwords : role.table_grants if try(role.table_grants, null) != null]
+}
+
+resource "postgresql_database" "logical_db" {
+  for_each         = { for database in var.databases : database.name => database }
+  name             = each.key
+  connection_limit = each.value.connection_limit
 }
 
 # If no password passed in, then use this to generate one
@@ -74,7 +73,7 @@ resource "postgresql_grant" "database_access" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_db]
+  depends_on = [postgresql_database.logical_db, postgresql_role.role]
 }
 
 resource "postgresql_grant" "schema_access" {
@@ -87,7 +86,7 @@ resource "postgresql_grant" "schema_access" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_db]
+  depends_on = [postgresql_database.logical_db, postgresql_role.role]
 }
 
 resource "postgresql_grant" "table_access" {
@@ -114,7 +113,7 @@ resource "postgresql_grant" "sequence_access" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_db]
+  depends_on = [postgresql_database.logical_db, postgresql_role.role]
 }
 
 resource "postgresql_default_privileges" "privileges" {
@@ -128,5 +127,5 @@ resource "postgresql_default_privileges" "privileges" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_db]
+  depends_on = [postgresql_database.logical_db, postgresql_role.role]
 }

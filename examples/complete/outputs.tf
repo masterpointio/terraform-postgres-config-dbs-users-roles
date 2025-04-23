@@ -1,3 +1,7 @@
+output "databases" {
+  value = module.app_dbs.databases
+}
+
 output "database_access" {
   value = module.app_dbs.database_access
 }

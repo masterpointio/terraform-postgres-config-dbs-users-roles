@@ -40,6 +40,7 @@ variable "databases" {
     name             = string
     connection_limit = number
   }))
+  default = []
 }
 
 
@@ -104,5 +105,6 @@ variable "roles" {
       privileges  = list(string)
     }))
   }))
+  default     = []
   description = "List of static postgres roles to create and related permissions. These are for applications that use static credentials and don't use IAM DB Auth. See defaults: https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_role"
 }
