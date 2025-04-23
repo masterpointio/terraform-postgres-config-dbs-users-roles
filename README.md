@@ -18,7 +18,7 @@ This repository serves as a child module for managing Postgres Logical Databases
 
 ### Example
 
-Please see [examples/complete](examples/complete/) for a working example.
+Please see [examples/complete](./examples/complete) for a working example.
 
 ```hcl
 provider "postgresql" {
