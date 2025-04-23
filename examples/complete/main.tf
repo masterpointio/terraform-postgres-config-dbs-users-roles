@@ -1,6 +1,6 @@
 # complete/main.tf
 
-module "app_dbs" {
+module "postgres_automation" {
   source = "../../"
 
   databases = var.databases

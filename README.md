@@ -1,6 +1,6 @@
 ![Banner][banner-image]](https://masterpoint.io/)
 
-# terraform-postgres-dbs-roles
+# terraform-postgres-automation
 
 [![Release][release-badge]][latest-release]
 
@@ -31,8 +31,8 @@ provider "postgresql" {
   sslmode   = "disable"
 }
 
-module "logical_dbs" {
-  source = "git::https://github.com/masterpointio/terraform-postgres-admin.git?ref=main"
+module "postgres_automation" {
+  source = "git::https://github.com/masterpointio/terraform-postgres-automation.git?ref=main"
 
   databases = [
     {
@@ -259,8 +259,8 @@ Copyright © 2016-2025 [Masterpoint Consulting LLC](https://masterpoint.io/)
 [newsletter-url]: https://newsletter.masterpoint.io/
 [youtube-badge]: https://img.shields.io/badge/YouTube-Subscribe-D191BF?style=for-the-badge&logo=youtube&logoColor=white
 [youtube-url]: https://www.youtube.com/channel/UCeeDaO2NREVlPy9Plqx-9JQ
-[release-badge]: https://img.shields.io/github/v/release/masterpointio/terraform-postgres-logical-dbs?color=0E383A&label=Release&style=for-the-badge&logo=github&logoColor=white
-[latest-release]: https://github.com/masterpointio/terraform-postgres-logical-dbs/releases/latest
-[contributors-image]: https://contrib.rocks/image?repo=masterpointio/terraform-postgres-logical-dbs
-[contributors-url]: https://github.com/masterpointio/terraform-postgres-logical-dbs/graphs/contributors
-[issues-url]: https://github.com/masterpointio/terraform-postgres-logical-dbs/issues
+[release-badge]: https://img.shields.io/github/v/release/masterpointio/terraform-postgres-automation?color=0E383A&label=Release&style=for-the-badge&logo=github&logoColor=white
+[latest-release]: https://github.com/masterpointio/terraform-postgres-automation/releases/latest
+[contributors-image]: https://contrib.rocks/image?repo=masterpointio/terraform-postgres-automation
+[contributors-url]: https://github.com/masterpointio/terraform-postgres-automation/graphs/contributors
+[issues-url]: https://github.com/masterpointio/terraform-postgres-automation/issues

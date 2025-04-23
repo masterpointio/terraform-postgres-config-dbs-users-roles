@@ -1,6 +1,8 @@
-# Example: Complete Setup for PostgreSQL Logical Databases
+# Example: Complete Setup
 
-This example demonstrates how to set up PostgreSQL logical databases and roles using Terraform. It includes configurations for both an application role and a read-only role.
+This example demonstrates how to set up the Terraform Postgres Automation.
+
+It includes configurations for both an application role and a read-only role.
 
 ## Prerequisites
 
@@ -23,12 +25,12 @@ This example demonstrates how to set up PostgreSQL logical databases and roles u
 
 The `fixtures.tfvars` file defines two roles:
 
-- **app1_app_user**: This role is intended for application use with the following permissions:
+- **system_user**: This role is intended for application use with the following permissions:
 
   - Can log in and is not a superuser.
-  - Has all privileges on tables and sequences in the `app1_db` database.
+  - Has all privileges on tables and sequences in the `app` database.
   - Can use and create within the `public` schema.
 
-- **app1_readonly_user**: This role is intended for read-only access with the following permissions:
+- **readonly_user**: This role is intended for read-only access with the following permissions:
   - Can log in and is not a superuser.
-  - Has `SELECT` privileges on tables and `USAGE`, `SELECT` on sequences in the `app1_db` database.
+  - Has `SELECT` privileges on tables and `USAGE`, `SELECT` on sequences in the `app` database.
