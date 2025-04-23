@@ -1,6 +1,6 @@
 # Example: Complete Setup for PostgreSQL Logical Databases
 
-This example demonstrates how to set up PostgreSQL logical databases using Terraform. It includes configurations for both an application user and a read-only user.
+This example demonstrates how to set up PostgreSQL logical databases and roles using Terraform. It includes configurations for both an application role and a read-only role.
 
 ## Prerequisites
 
