@@ -1,5 +1,5 @@
 locals {
-  roles_with_passwords = [for idx, role_data in var.roles : merge(role_data,
+  _roles_with_passwords = [for idx, role_data in var.roles : merge(role_data,
     {
       role : merge(role_data["role"],
         lookup(role_data["role"], "password", null) != null ? # Or if it's empty string?
@@ -13,21 +13,28 @@ locals {
     }
   )]
 
-  _database_grants    = [for role in local.roles_with_passwords : role.database_grants if try(role.database_grants, null) != null]
-  _default_privileges = flatten([for role in local.roles_with_passwords : role.default_privileges if try(role.default_privileges, null) != null])
-  _schema_grants      = [for role in local.roles_with_passwords : role.schema_grants if try(role.schema_grants, null) != null]
-  _sequence_grants    = [for role in local.roles_with_passwords : role.sequence_grants if try(role.sequence_grants, null) != null]
-  _table_grants       = [for role in local.roles_with_passwords : role.table_grants if try(role.table_grants, null) != null]
+  _database_grants    = [for role in local._roles_with_passwords : role.database_grants if try(role.database_grants, null) != null]
+  database_grants_map = { for grant in local._database_grants : format("%s-%s", grant.role, grant.database) => grant }
+
+  _default_privileges    = flatten([for role in local._roles_with_passwords : role.default_privileges if try(role.default_privileges, null) != null])
+  default_privileges_map = { for grant in local._default_privileges : format("%s-%s-%s-%s", grant.role, grant.database, grant.schema, grant.object_type) => grant }
+
+  _schema_grants    = [for role in local._roles_with_passwords : role.schema_grants if try(role.schema_grants, null) != null]
+  schema_grants_map = { for grant in local._schema_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
+
+  _sequence_grants    = [for role in local._roles_with_passwords : role.sequence_grants if try(role.sequence_grants, null) != null]
+  sequence_grants_map = { for grant in local._sequence_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
+
+  _table_grants    = [for role in local._roles_with_passwords : role.table_grants if try(role.table_grants, null) != null]
+  table_grants_map = { for grant in local._table_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
+
+  roles_map = { for role in local._roles_with_passwords : role.role.name => role }
+
+  databases_map = { for database in var.databases : database.name => database }
 }
 
-resource "postgresql_database" "logical_db" {
-  for_each         = { for database in var.databases : database.name => database }
-  name             = each.key
-  connection_limit = each.value.connection_limit
-}
-
-# If no password passed in, then use this to generate one
 resource "random_password" "user_password" {
+  # If no password passed in, then use this to generate one
   count = length(var.roles)
 
   length = 33
@@ -37,10 +44,17 @@ resource "random_password" "user_password" {
   override_special = "!#$%^&*()<>-_"
 }
 
+resource "postgresql_database" "logical_db" {
+  for_each = local.databases_map
+
+  name             = each.value.name
+  connection_limit = each.value.connection_limit
+}
+
 # In Postgres 15, now new users cannot create tables or write data to Postgres public schema by default. You have to grant create privilege to the new user manually.
 # https://www.postgresql.org/docs/current/ddl-priv.html#DDL-PRIV-CREATE
 resource "postgresql_role" "role" {
-  for_each = { for role in local.roles_with_passwords : role.role.name => role }
+  for_each = local.roles_map
 
   name                      = each.value.role.name
   superuser                 = each.value.role.superuser
@@ -65,8 +79,7 @@ resource "postgresql_role" "role" {
 }
 
 resource "postgresql_grant" "database_access" {
-
-  for_each = { for grant in local._database_grants : format("%s-%s", grant.role, grant.database) => grant }
+  for_each = local.database_grants_map
 
   role        = each.value.role
   database    = each.value.database
@@ -77,8 +90,7 @@ resource "postgresql_grant" "database_access" {
 }
 
 resource "postgresql_grant" "schema_access" {
-
-  for_each = { for grant in local._schema_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
+  for_each = local.schema_grants_map
 
   role        = each.value.role
   database    = each.value.database
@@ -90,8 +102,7 @@ resource "postgresql_grant" "schema_access" {
 }
 
 resource "postgresql_grant" "table_access" {
-
-  for_each = { for grant in local._table_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
+  for_each = local.table_grants_map
 
   role        = each.value.role
   database    = each.value.database
@@ -104,8 +115,7 @@ resource "postgresql_grant" "table_access" {
 }
 
 resource "postgresql_grant" "sequence_access" {
-
-  for_each = { for grant in local._sequence_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
+  for_each = local.sequence_grants_map
 
   role        = each.value.role
   database    = each.value.database
@@ -117,8 +127,7 @@ resource "postgresql_grant" "sequence_access" {
 }
 
 resource "postgresql_default_privileges" "privileges" {
-
-  for_each = { for grant in local._default_privileges : format("%s-%s-%s-%s", grant.role, grant.database, grant.schema, grant.object_type) => grant }
+  for_each = local.default_privileges_map
 
   role        = each.value.role
   database    = each.value.database
