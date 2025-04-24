@@ -2,7 +2,7 @@ locals {
   _roles_with_passwords = [for idx, role_data in var.roles : merge(role_data,
     {
       role : merge(role_data["role"],
-        lookup(role_data["role"], "password", null) != null ? # Or if it's empty string?
+        lookup(role_data["role"], "password", null) != null ?
         {
           password : role_data["role"]["password"]
         } :
