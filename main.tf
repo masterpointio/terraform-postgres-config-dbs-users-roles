@@ -44,7 +44,7 @@ resource "random_password" "user_password" {
   override_special = "!#$%^&*()<>-_"
 }
 
-resource "postgresql_database" "logical_db" {
+resource "postgresql_database" "logical_dbs" {
   for_each = local.databases_map
 
   name             = each.value.name
@@ -75,7 +75,7 @@ resource "postgresql_role" "role" {
   statement_timeout         = each.value.role.statement_timeout
   assume_role               = each.value.role.assume_role
 
-  depends_on = [postgresql_database.logical_db]
+  depends_on = [postgresql_database.logical_dbs]
 }
 
 resource "postgresql_grant" "database_access" {
@@ -86,7 +86,7 @@ resource "postgresql_grant" "database_access" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_db, postgresql_role.role]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
 }
 
 resource "postgresql_grant" "schema_access" {
@@ -98,7 +98,7 @@ resource "postgresql_grant" "schema_access" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_db, postgresql_role.role]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
 }
 
 resource "postgresql_grant" "table_access" {
@@ -111,7 +111,7 @@ resource "postgresql_grant" "table_access" {
   privileges  = each.value.privileges
   objects     = each.value.objects
 
-  depends_on = [postgresql_database.logical_db]
+  depends_on = [postgresql_database.logical_dbs]
 }
 
 resource "postgresql_grant" "sequence_access" {
@@ -123,7 +123,7 @@ resource "postgresql_grant" "sequence_access" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_db, postgresql_role.role]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
 }
 
 resource "postgresql_default_privileges" "privileges" {
@@ -136,5 +136,5 @@ resource "postgresql_default_privileges" "privileges" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_db, postgresql_role.role]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
 }

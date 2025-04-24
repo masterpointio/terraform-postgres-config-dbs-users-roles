@@ -1,5 +1,5 @@
 output "databases" {
-  value = postgresql_database.logical_db
+  value = postgresql_database.logical_dbs
 }
 
 output "database_access" {

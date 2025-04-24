@@ -155,7 +155,7 @@ module "postgres_automation" {
 
 | Name                                                                                                                                             | Type     |
 | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
-| [postgresql_database.logical_db](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/database)                     | resource |
+| [postgresql_database.logical_dbs](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/database)                    | resource |
 | [postgresql_default_privileges.privileges](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/default_privileges) | resource |
 | [postgresql_grant.database_access](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/grant)                      | resource |
 | [postgresql_grant.schema_access](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/grant)                        | resource |
