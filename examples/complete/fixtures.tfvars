@@ -1,10 +1,10 @@
 # complete/fixtures.tfvars
 
 # postgres shell command to create this user:
-# CREATE ROLE admin_user LOGIN CREATEDB PASSWORD 'insecure-pass-for-demo';
+# CREATE ROLE admin_user LOGIN CREATEDB PASSWORD 'insecure-pass-for-demo-admin-user';
 db_username = "admin_user"
 
-db_password  = "insecure-pass-for-demo"
+db_password  = "insecure-pass-for-demo-admin-user"
 db_scheme    = "postgres"
 db_hostname  = "localhost"
 db_port      = 5432
@@ -24,7 +24,7 @@ roles = [
       name      = "system_user"
       login     = true
       superuser = false
-      password  = "insecure-pass-for-demo-app"
+      password  = "insecure-pass-for-demo-system-user"
     }
 
     table_grants = {
@@ -57,7 +57,7 @@ roles = [
     role = {
       name      = "readonly_user"
       login     = true
-      password  = "insecure-pass-for-demo-readonly"
+      password  = "insecure-pass-for-demo-readonly-user"
       superuser = false
     }
 

@@ -47,7 +47,7 @@ module "postgres_automation" {
       name      = "system_user"
       login     = true
       superuser = false
-      password  = "insecure-pass-for-readme-app"
+      password  = "insecure-pass-for-readme-system-user"
     }
 
     table_grants = {
@@ -80,7 +80,7 @@ module "postgres_automation" {
     role = {
       name      = "readonly_user"
       login     = true
-      password  = "insecure-pass-for-readme-readonly"
+      password  = "insecure-pass-for-readme-readonly-user"
       superuser = false
     }
 
