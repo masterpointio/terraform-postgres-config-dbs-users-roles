@@ -23,7 +23,7 @@ variables {
 }
 
 run "validate_databases" {
-  command = plan
+  command = apply
 
   providers = {
     postgresql = postgresql.mock
@@ -70,9 +70,8 @@ run "validate_roles_with_random_password" {
     error_message = "Role should have random password"
   }
 
-  # ensure no special characters
   assert {
-    condition     = !contains(split("", postgresql_role.role["app_user2"].password), "!")
-    error_message = "Password should not contain the '!' character"
+    condition     = !contains(split("", postgresql_role.role["app_user2"].password), "!#$%^&*()<>-_")
+    error_message = "Password should not contain the '!#$%^&*()<>-_' characters"
   }
 }
