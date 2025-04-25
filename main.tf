@@ -78,6 +78,20 @@ resource "postgresql_role" "role" {
   depends_on = [postgresql_database.logical_dbs]
 }
 
+resource "postgresql_default_privileges" "privileges" {
+  for_each = local.default_privileges_map
+
+  role        = each.value.role
+  database    = each.value.database
+  schema      = each.value.schema
+  owner       = each.value.owner
+  object_type = each.value.object_type
+  privileges  = each.value.privileges
+
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
+}
+
+
 resource "postgresql_grant" "database_access" {
   for_each = local.database_grants_map
 
@@ -126,15 +140,3 @@ resource "postgresql_grant" "sequence_access" {
   depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
 }
 
-resource "postgresql_default_privileges" "privileges" {
-  for_each = local.default_privileges_map
-
-  role        = each.value.role
-  database    = each.value.database
-  schema      = each.value.schema
-  owner       = each.value.owner
-  object_type = each.value.object_type
-  privileges  = each.value.privileges
-
-  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
-}
