@@ -30,17 +30,17 @@ run "validate_databases" {
   }
 
   assert {
-    condition     = postgresql_database.logical_db["app"].name == "app"
+    condition     = postgresql_database.logical_dbs["app"].name == "app"
     error_message = "Database should have correct name"
   }
 
   assert {
-    condition     = postgresql_database.logical_db["app"].connection_limit == 10
+    condition     = postgresql_database.logical_dbs["app"].connection_limit == 10
     error_message = "Database should have correct connection limit"
   }
 
   assert {
-    condition     = postgresql_database.logical_db["app2"].connection_limit == null
+    condition     = postgresql_database.logical_dbs["app2"].connection_limit == null
     error_message = "Database should have no connection limit"
   }
 }
@@ -58,6 +58,7 @@ run "validate_roles_with_password" {
   } 
 }
 
+
 run "validate_roles_with_random_password" {
   command = apply
 
@@ -71,7 +72,7 @@ run "validate_roles_with_random_password" {
   }
 
   assert {
-    condition     = !contains(split("", postgresql_role.role["app_user2"].password), "!#$%^&*()<>-_")
-    error_message = "Password should not contain the '!#$%^&*()<>-_' characters"
+    condition = alltrue([for c in ["!", "#", "$", "%", "^", "&", "*", "(", ")", "<", ">", "-", "_"] : length(split(c, postgresql_role.role["app_user2"].password)) == 1])
+    error_message = "Password contains forbidden special characters"
   }
 }
