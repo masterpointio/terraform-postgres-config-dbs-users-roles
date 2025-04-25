@@ -13,11 +13,11 @@ locals {
     }
   )]
 
-  _database_grants    = [for role in local._roles_with_passwords : role.database_grants if try(role.database_grants, null) != null]
-  database_grants_map = { for grant in local._database_grants : format("%s-%s", grant.role, grant.database) => grant }
-
   _default_privileges    = flatten([for role in local._roles_with_passwords : role.default_privileges if try(role.default_privileges, null) != null])
   default_privileges_map = { for grant in local._default_privileges : format("%s-%s-%s-%s", grant.role, grant.database, grant.schema, grant.object_type) => grant }
+
+  _database_grants    = [for role in local._roles_with_passwords : role.database_grants if try(role.database_grants, null) != null]
+  database_grants_map = { for grant in local._database_grants : format("%s-%s", grant.role, grant.database) => grant }
 
   _schema_grants    = [for role in local._roles_with_passwords : role.schema_grants if try(role.schema_grants, null) != null]
   schema_grants_map = { for grant in local._schema_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
@@ -79,6 +79,9 @@ resource "postgresql_role" "role" {
 }
 
 resource "postgresql_default_privileges" "privileges" {
+  # Postgres documentation specific to default privileges
+  # https://www.postgresql.org/docs/current/sql-alterdefaultprivileges.html
+
   for_each = local.default_privileges_map
 
   role        = each.value.role
@@ -90,7 +93,6 @@ resource "postgresql_default_privileges" "privileges" {
 
   depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
 }
-
 
 resource "postgresql_grant" "database_access" {
   for_each = local.database_grants_map

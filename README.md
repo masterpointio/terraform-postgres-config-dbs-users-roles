@@ -14,7 +14,8 @@ This repository serves as a child module for managing Postgres Logical Databases
 
 ### Prerequisites
 
-1. Postgres user with `LOGIN` privileges
+1. Postgres user with `LOGIN` privileges.
+2. Postgres user should have appropriate privileges for the specifiic operations you're doing. For example, if you want to create a role, your postgres user should have the `CREATEROLE` privilege.
 
 ### Example
 
