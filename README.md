@@ -8,7 +8,7 @@
 
 ## Purpose and Functionality
 
-This repository serves as a child module for managing Postgres Logical Databases and Roles
+This repository serves as a [child module](https://opentofu.org/docs/language/modules/#child-modules) for managing Postgres Logical Databases, Users, and Roles.
 
 ## Usage
 
@@ -33,7 +33,7 @@ provider "postgresql" {
 }
 
 module "postgres_automation" {
-  source = "git::https://github.com/masterpointio/terraform-postgres-automation.git?ref=main"
+  source = "git::https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles.git?ref=main"
 
   databases = [
     {
