@@ -1,6 +1,6 @@
 [![Banner][banner-image]](https://masterpoint.io/)
 
-# terraform-postgres-automation
+# terraform-postgres-config-dbs-users-roles
 
 [![Release][release-badge]][latest-release]
 
@@ -260,8 +260,8 @@ Copyright © 2016-2025 [Masterpoint Consulting LLC](https://masterpoint.io/)
 [newsletter-url]: https://newsletter.masterpoint.io/
 [youtube-badge]: https://img.shields.io/badge/YouTube-Subscribe-D191BF?style=for-the-badge&logo=youtube&logoColor=white
 [youtube-url]: https://www.youtube.com/channel/UCeeDaO2NREVlPy9Plqx-9JQ
-[release-badge]: https://img.shields.io/github/v/release/masterpointio/terraform-postgres-automation?color=0E383A&label=Release&style=for-the-badge&logo=github&logoColor=white
-[latest-release]: https://github.com/masterpointio/terraform-postgres-automation/releases/latest
-[contributors-image]: https://contrib.rocks/image?repo=masterpointio/terraform-postgres-automation
-[contributors-url]: https://github.com/masterpointio/terraform-postgres-automation/graphs/contributors
-[issues-url]: https://github.com/masterpointio/terraform-postgres-automation/issues
+[release-badge]: https://img.shields.io/github/v/release/masterpointio/terraform-postgres-config-dbs-users-roles?color=0E383A&label=Release&style=for-the-badge&logo=github&logoColor=white
+[latest-release]: https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/releases/latest
+[contributors-image]: https://contrib.rocks/image?repo=masterpointio/terraform-postgres-config-dbs-users-roles
+[contributors-url]: https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/graphs/contributors
+[issues-url]: https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/issues
