@@ -1,6 +1,6 @@
 [![Banner][banner-image]](https://masterpoint.io/)
 
-# terraform-postgres-config-users-db-roles
+# terraform-postgres-config-dbs-users-roles
 
 [![Release][release-badge]][latest-release]
 
