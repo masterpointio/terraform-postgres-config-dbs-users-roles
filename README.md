@@ -33,7 +33,8 @@ provider "postgresql" {
 }
 
 module "postgres_automation" {
-  source = "git::https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles.git?ref=main"
+  source  = "masterpointio/config-dbs-users-roles/postgres"
+  version = "X.X.X"
 
   databases = [
     {
