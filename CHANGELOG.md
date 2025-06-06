@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/compare/v0.1.0...v0.1.1) (2025-06-06)
+
+
+### Bug Fixes
+
+* sync with core template ([#9](https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/issues/9)) ([dbcaa92](https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/commit/dbcaa92e1e4e0c99a072245c4032328f9cf919c1))
+
 ## 0.1.0 (2025-05-20)
 
 
