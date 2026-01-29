@@ -2,8 +2,6 @@
 
 This example shows how to create a comprehensive role-based access control (RBAC) setup for an LLM pattern reviewer service with multiple schemas and permission boundaries.
 
-See [docs/llm_app_example.md](../../docs/llm_app_example.md) for the full design document.
-
 ## Prerequisites
 
 1. **PostgreSQL running locally** (e.g., via Homebrew: `brew services start postgresql@17`)
@@ -77,8 +75,6 @@ Run the included test scripts to verify all permissions:
 ./4_cleanup.sh            # Clean up test objects and destroy infrastructure
 ```
 
-See [docs/llm_app_example.md](../../docs/llm_app_example.md) for the full design document and detailed test plan.
-
 ## Roles and Permissions
 
 Group roles (no login) use the `role_` prefix. Login roles do not have the prefix.
@@ -95,6 +91,16 @@ Group roles (no login) use the `role_` prefix. Login roles do not have the prefi
 | `service_fastapi_ro`     | FastAPI backend with read-only access              | Yes   | 30               |
 | `service_pipeline_rw`    | Data pipeline with write access to all schemas     | Yes   | 10               |
 | `service_pipeline_ro`    | Data pipeline with read-only access to all schemas | Yes   | 10               |
+
+## Schemas
+
+| Schema         | Purpose                                                            |
+| -------------- | ------------------------------------------------------------------ |
+| `app`          | LLM Chat Application tables (users, conversations, messages, etc.) |
+| `ref_data_abc` | Data pipeline for document corpus ingestion (supports RAG)         |
+| `ref_data_xyz` | Data pipeline for document corpus processing (supports RAG)        |
+
+The `ref_data_*` schemas are managed by separate data pipelines that populate the document corpus used by the Chat Application's RAG (Retrieval-Augmented Generation) system.
 
 ## Schema Access Matrix
 

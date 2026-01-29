@@ -96,8 +96,6 @@ If any test fails, you'll see an error message indicating the permission issue.
 
 ## Manual Test Commands
 
-You can also run individual tests manually. See `docs/llm_app_example.md` for the complete test plan with all commands.
-
 Example:
 
 ```bash
@@ -133,9 +131,3 @@ tofu destroy -auto-approve
 
 - If re-running, you may need to destroy first: `tofu destroy -auto-approve`
 - Or manually drop roles: `DROP ROLE IF EXISTS role_service_* CASCADE;`
-
-## Architecture
-
-For detailed information about the role architecture, schemas, and design decisions, see:
-
-- `/Users/weston/clients/masterpoint/terraform-postgres-config-dbs-users-roles/docs/llm_app_example.md`
