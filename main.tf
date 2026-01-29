@@ -28,8 +28,6 @@ locals {
   _table_grants    = [for role in local._roles_with_passwords : role.table_grants if try(role.table_grants, null) != null]
   table_grants_map = { for grant in local._table_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
-  roles_map = { for role in local._roles_with_passwords : role.role.name => role }
-
   databases_map = { for database in var.databases : database.name => database }
 
   # Built-in PostgreSQL roles that don't need to be created by this module
