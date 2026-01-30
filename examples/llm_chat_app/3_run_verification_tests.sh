@@ -15,10 +15,13 @@ echo ""
 # Test 2: Migration Role DDL Access
 echo "--- Test 2: Migration Role DDL Access ---"
 PGUSER=service_migrator PGPASSWORD=demo-password-migrator psql -c "
+SET ROLE role_service_migration;
 CREATE TABLE app.migration_test (id int);
 ALTER TABLE app.migration_test ADD COLUMN name text;
+INSERT INTO app.migration_test (id) VALUES (1);
+TRUNCATE app.migration_test;
 DROP TABLE app.migration_test;
-SELECT 'TEST 2 PASSED: Migration role has DDL access' AS result;
+SELECT 'TEST 2 PASSED: Migration role has DDL access (including TRUNCATE)' AS result;
 "
 echo ""
 
@@ -30,6 +33,16 @@ INSERT INTO app.test_users (name) VALUES ('fastapi_test');
 DELETE FROM app.test_users WHERE name = 'fastapi_test';
 SELECT 'TEST 3 PASSED: FastAPI RW has app DML' AS result;
 "
+echo ""
+
+# Test 3b: FastAPI RW Role - Verify TRUNCATE is denied
+echo "--- Test 3b: FastAPI RW Role - Verify TRUNCATE denied ---"
+if PGUSER=service_fastapi_rw PGPASSWORD=demo-password-fastapi-rw psql -c "TRUNCATE app.test_users;" 2>&1 | grep -q "permission denied"; then
+  echo "TEST 3b PASSED: FastAPI RW correctly denied TRUNCATE"
+else
+  echo "TEST 3b FAILED: FastAPI RW should not have TRUNCATE permission"
+  exit 1
+fi
 echo ""
 
 # Test 4: FastAPI RO Role

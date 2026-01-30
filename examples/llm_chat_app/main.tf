@@ -52,7 +52,7 @@ resource "postgresql_grant" "rw_app_tables" {
   role        = "role_service_rw"
   schema      = "app"
   object_type = "table"
-  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"]
+  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
 
   depends_on = [module.postgres_automation, postgresql_schema.app]
 }
@@ -73,7 +73,7 @@ resource "postgresql_default_privileges" "rw_app_tables" {
   schema      = "app"
   owner       = "role_service_migration"
   object_type = "table"
-  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"]
+  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
 
   depends_on = [module.postgres_automation, postgresql_schema.app]
 }
