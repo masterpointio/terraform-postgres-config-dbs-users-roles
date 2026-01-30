@@ -31,7 +31,7 @@ export PGDATABASE=llm_service
 echo "--- Prerequisites: Creating Test Objects ---"
 echo ""
 
-PGUSER=role_service_migration PGPASSWORD=demo-password-migration psql <<'EOF'
+PGUSER=service_migrator PGPASSWORD=demo-password-migration psql <<'EOF'
 -- Create test table in app schema
 CREATE TABLE IF NOT EXISTS app.test_users (
     id SERIAL PRIMARY KEY,
@@ -75,7 +75,7 @@ echo ""
 
 # Test 2: Migration Role DDL Access
 echo "--- Test 2: Migration Role DDL Access ---"
-PGUSER=role_service_migration PGPASSWORD=demo-password-migration PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
+PGUSER=service_migrator PGPASSWORD=demo-password-migration PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
 CREATE TABLE app.migration_test (id int);
 ALTER TABLE app.migration_test ADD COLUMN name text;
 DROP TABLE app.migration_test;
@@ -85,7 +85,7 @@ echo ""
 
 # Test 3: FastAPI RW Role
 echo "--- Test 3: FastAPI RW Role - DML on app schema ---"
-PGUSER=role_service_fastapi_rw PGPASSWORD=demo-password-fastapi-rw PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
+PGUSER=service_fastapi_rw PGPASSWORD=demo-password-fastapi-rw PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
 SELECT * FROM app.test_users;
 INSERT INTO app.test_users (name) VALUES ('fastapi_test');
 DELETE FROM app.test_users WHERE name = 'fastapi_test';
@@ -95,7 +95,7 @@ echo ""
 
 # Test 4: FastAPI RO Role
 echo "--- Test 4: FastAPI RO Role - SELECT only ---"
-PGUSER=role_service_fastapi_ro PGPASSWORD=demo-password-fastapi-ro PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
+PGUSER=service_fastapi_ro PGPASSWORD=demo-password-fastapi-ro PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
 SELECT * FROM app.test_users;
 SELECT 'TEST 4 PASSED: FastAPI RO has SELECT' AS result;
 "
@@ -103,7 +103,7 @@ echo ""
 
 # Test 5: Pipeline RW Role
 echo "--- Test 5: Pipeline RW Role - All schemas access ---"
-PGUSER=role_service_pipeline_rw PGPASSWORD=demo-password-pipeline-rw PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
+PGUSER=service_pipeline_rw PGPASSWORD=demo-password-pipeline-rw PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
 SELECT * FROM app.test_users;
 SELECT * FROM ref_data_pipeline_abc.test_ref;
 SELECT * FROM ref_data_pipeline_xyz.test_ref;
@@ -113,7 +113,7 @@ echo ""
 
 # Test 6: Pipeline RO Role
 echo "--- Test 6: Pipeline RO Role - Read access to all schemas ---"
-PGUSER=role_service_pipeline_ro PGPASSWORD=demo-password-pipeline-ro PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
+PGUSER=service_pipeline_ro PGPASSWORD=demo-password-pipeline-ro PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
 SELECT * FROM app.test_users;
 SELECT * FROM ref_data_pipeline_abc.test_ref;
 SELECT * FROM ref_data_pipeline_xyz.test_ref;
@@ -123,7 +123,7 @@ echo ""
 
 # Test 7: Connection Limits
 echo "--- Test 7: Connection Limits ---"
-PGUSER=role_service_migration PGPASSWORD=demo-password-migration PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
+PGUSER=service_migrator PGPASSWORD=demo-password-migration PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
 SELECT rolname, rolconnlimit
 FROM pg_roles
 WHERE rolname LIKE 'role_service_%'
@@ -133,7 +133,7 @@ echo ""
 
 # Test 8: Role Inheritance
 echo "--- Test 8: Role Inheritance ---"
-PGUSER=role_service_migration PGPASSWORD=demo-password-migration PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
+PGUSER=service_migrator PGPASSWORD=demo-password-migration PGHOST=localhost PGPORT=5432 PGDATABASE=llm_service psql -c "
 SELECT
     r.rolname AS role,
     ARRAY_AGG(m.rolname) AS member_of

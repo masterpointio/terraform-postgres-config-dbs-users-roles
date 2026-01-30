@@ -86,13 +86,13 @@ If any test fails, you'll see an error message indicating the permission issue.
 
 ## Test Roles and Credentials
 
-| Role                       | Password                    | Access Level              |
-| -------------------------- | --------------------------- | ------------------------- |
-| `role_service_migration`   | `demo-password-migration`   | DDL + DML on all schemas  |
-| `role_service_fastapi_rw`  | `demo-password-fastapi-rw`  | DML on app schema only    |
-| `role_service_fastapi_ro`  | `demo-password-fastapi-ro`  | SELECT on app schema only |
-| `role_service_pipeline_rw` | `demo-password-pipeline-rw` | DML on all schemas        |
-| `role_service_pipeline_ro` | `demo-password-pipeline-ro` | SELECT on all schemas     |
+| Role                  | Password                    | Access Level              |
+| --------------------- | --------------------------- | ------------------------- |
+| `service_migrator`    | `demo-password-migration`   | DDL + DML on all schemas  |
+| `service_fastapi_rw`  | `demo-password-fastapi-rw`  | DML on app schema only    |
+| `service_fastapi_ro`  | `demo-password-fastapi-ro`  | SELECT on app schema only |
+| `service_pipeline_rw` | `demo-password-pipeline-rw` | DML on all schemas        |
+| `service_pipeline_ro` | `demo-password-pipeline-ro` | SELECT on all schemas     |
 
 ## Manual Test Commands
 
@@ -103,7 +103,7 @@ export PGHOST=localhost
 export PGPORT=5432
 export PGDATABASE=llm_service
 
-PGUSER=role_service_fastapi_rw PGPASSWORD=demo-password-fastapi-rw psql -c "SELECT * FROM app.test_users;"
+PGUSER=service_fastapi_rw PGPASSWORD=demo-password-fastapi-rw psql -c "SELECT * FROM app.test_users;"
 ```
 
 ## Cleanup

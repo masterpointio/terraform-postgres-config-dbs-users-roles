@@ -12,7 +12,7 @@ echo "Creating Test Objects"
 echo "=============================================="
 echo ""
 
-PGUSER=role_service_migration PGPASSWORD=demo-password-migration psql <<'EOF'
+PGUSER=service_migrator PGPASSWORD=demo-password-migration psql <<'EOF'
 -- Create test table in app schema
 CREATE TABLE IF NOT EXISTS app.test_users (
     id SERIAL PRIMARY KEY,
