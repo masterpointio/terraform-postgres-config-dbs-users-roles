@@ -130,4 +130,4 @@ tofu destroy -auto-approve
 ### Role Already Exists
 
 - If re-running, you may need to destroy first: `tofu destroy -auto-approve`
-- Or manually drop roles: `DROP ROLE IF EXISTS role_service_* CASCADE;`
+- Or manually drop roles using `4_cleanup.sh` script, or run individual DROP statements
