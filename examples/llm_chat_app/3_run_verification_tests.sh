@@ -14,7 +14,7 @@ echo ""
 
 # Test 2: Migration Role DDL Access
 echo "--- Test 2: Migration Role DDL Access ---"
-PGUSER=service_migrator PGPASSWORD=demo-password-migration psql -c "
+PGUSER=service_migrator PGPASSWORD=demo-password-migrator psql -c "
 CREATE TABLE app.migration_test (id int);
 ALTER TABLE app.migration_test ADD COLUMN name text;
 DROP TABLE app.migration_test;
@@ -62,7 +62,7 @@ echo ""
 
 # Test 7: Connection Limits
 echo "--- Test 7: Connection Limits ---"
-PGUSER=service_migrator PGPASSWORD=demo-password-migration psql -c "
+PGUSER=service_migrator PGPASSWORD=demo-password-migrator psql -c "
 SELECT rolname, rolconnlimit
 FROM pg_roles
 WHERE rolname LIKE 'role_service_%'
@@ -72,7 +72,7 @@ echo ""
 
 # Test 8: Role Inheritance
 echo "--- Test 8: Role Inheritance ---"
-PGUSER=service_migrator PGPASSWORD=demo-password-migration psql -c "
+PGUSER=service_migrator PGPASSWORD=demo-password-migrator psql -c "
 SELECT
     r.rolname AS role,
     ARRAY_AGG(m.rolname) AS member_of

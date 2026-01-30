@@ -12,7 +12,11 @@ echo "Creating Test Objects"
 echo "=============================================="
 echo ""
 
-PGUSER=service_migrator PGPASSWORD=demo-password-migration psql <<'EOF'
+PGUSER=service_migrator PGPASSWORD=demo-password-migrator psql <<'EOF'
+-- Switch to group role so objects are owned by role_service_migration
+-- This ensures default privileges apply correctly
+SET ROLE role_service_migration;
+
 -- Create test table in app schema
 CREATE TABLE IF NOT EXISTS app.test_users (
     id SERIAL PRIMARY KEY,
