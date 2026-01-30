@@ -3,7 +3,7 @@
 
 set -e
 
-SCRIPT_DIR="/Users/weston/clients/masterpoint/terraform-postgres-config-dbs-users-roles/examples/llm_chat_app"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "========================================"
 echo "LLM Chat App - Complete Test Suite"

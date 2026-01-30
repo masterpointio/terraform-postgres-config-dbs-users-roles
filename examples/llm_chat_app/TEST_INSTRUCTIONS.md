@@ -17,7 +17,7 @@ This directory contains scripts to apply the Terraform configuration and run ver
 To run all tasks in sequence:
 
 ```bash
-cd /Users/weston/clients/masterpoint/terraform-postgres-config-dbs-users-roles/examples/llm_chat_app
+cd examples/llm_chat_app
 chmod +x RUN_ALL_TESTS.sh
 ./RUN_ALL_TESTS.sh
 ```
@@ -111,7 +111,7 @@ PGUSER=role_service_fastapi_rw PGPASSWORD=demo-password-fastapi-rw psql -c "SELE
 To destroy all resources:
 
 ```bash
-cd /Users/weston/clients/masterpoint/terraform-postgres-config-dbs-users-roles/examples/llm_chat_app
+cd examples/llm_chat_app
 tofu destroy -auto-approve
 ```
 

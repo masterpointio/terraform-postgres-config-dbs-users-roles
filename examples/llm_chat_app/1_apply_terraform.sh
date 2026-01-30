@@ -8,7 +8,7 @@ echo "Applying Terraform Configuration"
 echo "=============================================="
 echo ""
 
-cd /Users/weston/clients/masterpoint/terraform-postgres-config-dbs-users-roles/examples/llm_chat_app
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
 tofu apply -auto-approve
 
