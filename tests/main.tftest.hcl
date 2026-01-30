@@ -186,9 +186,9 @@ run "validate_roles_with_password" {
   }
 
   assert {
-    condition     = postgresql_role.role["app_user"].password == "app_user_password"
+    condition     = postgresql_role.base_role["app_user"].password == "app_user_password"
     error_message = "Role should have correct password"
-  } 
+  }
 }
 
 
@@ -200,12 +200,12 @@ run "validate_roles_with_random_password" {
   }
 
   assert {
-    condition     = length(postgresql_role.role["app_user2"].password) == 33
+    condition     = length(postgresql_role.base_role["app_user2"].password) == 33
     error_message = "Role should have random password"
   }
 
   assert {
-    condition = alltrue([for c in ["!", "#", "$", "%", "^", "&", "*", "(", ")", "<", ">", "-", "_"] : length(split(c, postgresql_role.role["app_user2"].password)) == 1])
+    condition     = alltrue([for c in ["!", "#", "$", "%", "^", "&", "*", "(", ")", "<", ">", "-", "_"] : length(split(c, postgresql_role.base_role["app_user2"].password)) == 1])
     error_message = "Password contains forbidden special characters"
   }
 }

@@ -163,7 +163,8 @@ module "postgres_automation" {
 | [postgresql_grant.schema_access](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/grant)                        | resource |
 | [postgresql_grant.sequence_access](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/grant)                      | resource |
 | [postgresql_grant.table_access](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/grant)                         | resource |
-| [postgresql_role.role](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/role)                                   | resource |
+| [postgresql_role.base_role](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/role)                              | resource |
+| [postgresql_role.dependent_role](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/role)                         | resource |
 | [random_password.user_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password)                         | resource |
 
 ## Inputs
@@ -193,14 +194,17 @@ module "postgres_automation" {
 
 ## Outputs
 
-| Name                                                                                      | Description |
-| ----------------------------------------------------------------------------------------- | ----------- |
-| <a name="output_database_access"></a> [database_access](#output_database_access)          | n/a         |
-| <a name="output_databases"></a> [databases](#output_databases)                            | n/a         |
-| <a name="output_default_privileges"></a> [default_privileges](#output_default_privileges) | n/a         |
-| <a name="output_schema_access"></a> [schema_access](#output_schema_access)                | n/a         |
-| <a name="output_sequence_access"></a> [sequence_access](#output_sequence_access)          | n/a         |
-| <a name="output_table_access"></a> [table_access](#output_table_access)                   | n/a         |
+| Name                                                                                      | Description                                                        |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| <a name="output_base_roles"></a> [base_roles](#output_base_roles)                         | Base roles (group roles, no dependencies on other custom roles)    |
+| <a name="output_database_access"></a> [database_access](#output_database_access)          | n/a                                                                |
+| <a name="output_databases"></a> [databases](#output_databases)                            | n/a                                                                |
+| <a name="output_default_privileges"></a> [default_privileges](#output_default_privileges) | n/a                                                                |
+| <a name="output_dependent_roles"></a> [dependent_roles](#output_dependent_roles)          | Dependent roles (login roles that inherit from other custom roles) |
+| <a name="output_roles"></a> [roles](#output_roles)                                        | All created roles (both base and dependent)                        |
+| <a name="output_schema_access"></a> [schema_access](#output_schema_access)                | n/a                                                                |
+| <a name="output_sequence_access"></a> [sequence_access](#output_sequence_access)          | n/a                                                                |
+| <a name="output_table_access"></a> [table_access](#output_table_access)                   | n/a                                                                |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
