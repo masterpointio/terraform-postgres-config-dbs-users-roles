@@ -24,41 +24,30 @@ WHERE datname = 'llm_service' AND pid <> pg_backend_pid();
 " 2>/dev/null || true
 
 echo ""
-echo "Step 2: Dropping database llm_service..."
-psql -c "DROP DATABASE IF EXISTS llm_service;"
+echo "Step 2: Destroying Terraform-managed resources..."
+cd "$(dirname "${BASH_SOURCE[0]}")"
+tofu destroy -auto-approve
 
 echo ""
-echo "Step 3: Dropping login roles..."
-# Drop login roles first (they depend on group roles)
+echo "Step 3: Dropping any remaining roles not managed by Terraform (safety net)..."
 psql <<'EOF'
-DROP ROLE IF EXISTS role_service_migrator;
-DROP ROLE IF EXISTS role_service_fastapi_rw;
-DROP ROLE IF EXISTS role_service_fastapi_ro;
-DROP ROLE IF EXISTS role_service_pipeline_rw;
-DROP ROLE IF EXISTS role_service_pipeline_ro;
-EOF
-
-echo ""
-echo "Step 4: Dropping group roles..."
-# Drop group roles (no dependencies)
-psql <<'EOF'
+DROP ROLE IF EXISTS service_migrator;
+DROP ROLE IF EXISTS service_fastapi_rw;
+DROP ROLE IF EXISTS service_fastapi_ro;
+DROP ROLE IF EXISTS service_pipeline_rw;
+DROP ROLE IF EXISTS service_pipeline_ro;
 DROP ROLE IF EXISTS role_service_migration;
 DROP ROLE IF EXISTS role_service_rw;
 DROP ROLE IF EXISTS role_service_ro;
-EOF
-
-echo ""
-echo "Step 5: Dropping cluster-wide roles..."
-psql <<'EOF'
 DROP ROLE IF EXISTS role_pg_cluster_admin;
 DROP ROLE IF EXISTS role_pg_monitoring;
 EOF
 
 echo ""
-echo "Step 6: Verifying cleanup..."
+echo "Step 4: Verifying cleanup..."
 psql -c "
 SELECT rolname FROM pg_roles
-WHERE rolname LIKE 'role_service_%' OR rolname LIKE 'role_pg_%'
+WHERE rolname LIKE 'role_service_%' OR rolname LIKE 'role_pg_%' OR rolname LIKE 'service_%'
 ORDER BY rolname;
 "
 

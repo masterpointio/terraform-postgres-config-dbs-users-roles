@@ -82,29 +82,29 @@ variable "roles" {
       object_type = string
       privileges  = list(string)
     }))
-    schema_grants = optional(object({
+    schema_grants = optional(list(object({
       role        = string
       database    = string
       schema      = string
       object_type = string
       privileges  = list(string)
-    }))
-    table_grants = optional(object({
+    })))
+    table_grants = optional(list(object({
       role        = string
       database    = string
       schema      = string
       object_type = string
-      objects     = list(string)
+      objects     = optional(list(string))
       privileges  = list(string)
-    }))
-    sequence_grants = optional(object({
+    })))
+    sequence_grants = optional(list(object({
       role        = string
       database    = string
       schema      = string
       object_type = string
-      objects     = list(string)
+      objects     = optional(list(string))
       privileges  = list(string)
-    }))
+    })))
   }))
   default     = []
   description = "List of static postgres roles to create and related permissions. These are for applications that use static credentials and don't use IAM DB Auth. See defaults: https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_role"

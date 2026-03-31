@@ -22,11 +22,11 @@ databases = [
 
 # Role configuration
 roles = [
+
   # ========================================
   # Cluster-wide roles
   # ========================================
 
-  # Cluster admin role - manages users/roles across all databases
   {
     role = {
       name            = "role_pg_cluster_admin"
@@ -38,7 +38,6 @@ roles = [
     }
   },
 
-  # Monitoring role - read-only access to system statistics
   {
     role = {
       name     = "role_pg_monitoring"
@@ -50,17 +49,14 @@ roles = [
   },
 
   # ========================================
-  # Service-scoped roles (llm_service)
+  # Migration group role - owns all schemas and DDL
   # ========================================
 
-  # Migration group role - owns database, schemas, and all objects (no login)
   {
     role = {
-      name            = "role_service_migration"
-      login           = false # group role, no login
-      inherit         = true
-      create_role     = false
-      create_database = false
+      name    = "role_service_migration"
+      login   = false
+      inherit = true
     }
     database_grants = {
       role        = "role_service_migration"
@@ -68,6 +64,21 @@ roles = [
       object_type = "database"
       privileges  = ["CREATE", "CONNECT", "TEMPORARY"]
     }
+    schema_grants = [
+      { role = "role_service_migration", database = "llm_service", schema = "app", object_type = "schema", privileges = ["USAGE", "CREATE"] },
+      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "schema", privileges = ["USAGE", "CREATE"] },
+      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "schema", privileges = ["USAGE", "CREATE"] },
+    ]
+    table_grants = [
+      { role = "role_service_migration", database = "llm_service", schema = "app", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] },
+      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] },
+      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] },
+    ]
+    sequence_grants = [
+      { role = "role_service_migration", database = "llm_service", schema = "app", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+    ]
   },
 
   # Migration login role - inherits from migration group
@@ -83,11 +94,9 @@ roles = [
   },
 
   # ========================================
-  # Group roles (no login)
+  # RW group role - read/write on app schema
   # ========================================
 
-  # RW group role - read/write permissions on app schema
-  # Note: Schema-specific grants are in main.tf (depends on schema creation)
   {
     role = {
       name    = "role_service_rw"
@@ -100,10 +109,26 @@ roles = [
       object_type = "database"
       privileges  = ["CONNECT"]
     }
+    schema_grants = [
+      { role = "role_service_rw", database = "llm_service", schema = "app", object_type = "schema", privileges = ["USAGE"] },
+    ]
+    table_grants = [
+      { role = "role_service_rw", database = "llm_service", schema = "app", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
+    ]
+    sequence_grants = [
+      { role = "role_service_rw", database = "llm_service", schema = "app", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+    ]
+    default_privileges = [
+      { role = "role_service_rw", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
+      { role = "role_service_rw", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "role_service_rw", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+    ]
   },
 
-  # RO group role - read-only permissions on app schema
-  # Note: Schema-specific grants are in main.tf (depends on schema creation)
+  # ========================================
+  # RO group role - read-only on app schema
+  # ========================================
+
   {
     role = {
       name    = "role_service_ro"
@@ -116,13 +141,26 @@ roles = [
       object_type = "database"
       privileges  = ["CONNECT"]
     }
+    schema_grants = [
+      { role = "role_service_ro", database = "llm_service", schema = "app", object_type = "schema", privileges = ["USAGE"] },
+    ]
+    table_grants = [
+      { role = "role_service_ro", database = "llm_service", schema = "app", object_type = "table", privileges = ["SELECT"] },
+    ]
+    sequence_grants = [
+      { role = "role_service_ro", database = "llm_service", schema = "app", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+    ]
+    default_privileges = [
+      { role = "role_service_ro", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "table", privileges = ["SELECT"] },
+      { role = "role_service_ro", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "role_service_ro", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+    ]
   },
 
   # ========================================
-  # Login roles (Application Processes)
+  # Login roles - app schema (inherit from rw/ro)
   # ========================================
 
-  # FastAPI backend - read/write
   {
     role = {
       name             = "service_fastapi_rw"
@@ -134,7 +172,6 @@ roles = [
     }
   },
 
-  # FastAPI backend - read-only
   {
     role = {
       name             = "service_fastapi_ro"
@@ -146,7 +183,10 @@ roles = [
     }
   },
 
-  # Data pipeline - read/write (inherits app access, ref_data grants in main.tf)
+  # ========================================
+  # Pipeline login roles - ref_data schemas + inherited app access
+  # ========================================
+
   {
     role = {
       name             = "service_pipeline_rw"
@@ -156,9 +196,28 @@ roles = [
       connection_limit = 10
       password         = "demo-password-pipeline-rw"
     }
+    schema_grants = [
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "schema", privileges = ["USAGE"] },
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "schema", privileges = ["USAGE"] },
+    ]
+    table_grants = [
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
+    ]
+    sequence_grants = [
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+    ]
+    default_privileges = [
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+    ]
   },
 
-  # Data pipeline - read-only (inherits app access, ref_data grants in main.tf)
   {
     role = {
       name             = "service_pipeline_ro"
@@ -168,5 +227,25 @@ roles = [
       connection_limit = 10
       password         = "demo-password-pipeline-ro"
     }
-  }
+    schema_grants = [
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "schema", privileges = ["USAGE"] },
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "schema", privileges = ["USAGE"] },
+    ]
+    table_grants = [
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "table", privileges = ["SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "table", privileges = ["SELECT"] },
+    ]
+    sequence_grants = [
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+    ]
+    default_privileges = [
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "table", privileges = ["SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "table", privileges = ["SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+    ]
+  },
 ]

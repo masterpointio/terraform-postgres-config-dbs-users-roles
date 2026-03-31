@@ -49,30 +49,29 @@ variables {
             object_type = "database"
             privileges = ["CONNECT"]
         }
-        schema_grants = {
+        schema_grants = [{
           role        = "app_user"
           database    = "app2"
           schema      = "public"
           object_type = "schema"
-          objects     = ["public"]
           privileges  = ["USAGE"]
-        }
-        sequence_grants = {
+        }]
+        sequence_grants = [{
             role        = "app_user"
             database    = "app2"
             schema      = "public"
             object_type = "sequence"
             objects     = [] # all sequences
             privileges  = ["USAGE", "SELECT"]
-        }
-        table_grants = {
+        }]
+        table_grants = [{
             role        = "app_user"
             database    = "app2"
             schema      = "public"
             object_type = "table"
             objects     = [] # all tables
             privileges  = ["SELECT"]
-        }
+        }]
     }, {
         role = {
             name = "app_user2"

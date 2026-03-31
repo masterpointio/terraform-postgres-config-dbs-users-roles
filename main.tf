@@ -19,13 +19,13 @@ locals {
   _database_grants    = [for role in local._roles_with_passwords : role.database_grants if try(role.database_grants, null) != null]
   database_grants_map = { for grant in local._database_grants : format("%s-%s", grant.role, grant.database) => grant }
 
-  _schema_grants    = [for role in local._roles_with_passwords : role.schema_grants if try(role.schema_grants, null) != null]
+  _schema_grants    = flatten([for role in local._roles_with_passwords : coalesce(role.schema_grants, [])])
   schema_grants_map = { for grant in local._schema_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
-  _sequence_grants    = [for role in local._roles_with_passwords : role.sequence_grants if try(role.sequence_grants, null) != null]
+  _sequence_grants    = flatten([for role in local._roles_with_passwords : coalesce(role.sequence_grants, [])])
   sequence_grants_map = { for grant in local._sequence_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
-  _table_grants    = [for role in local._roles_with_passwords : role.table_grants if try(role.table_grants, null) != null]
+  _table_grants    = flatten([for role in local._roles_with_passwords : coalesce(role.table_grants, [])])
   table_grants_map = { for grant in local._table_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
   databases_map = { for database in var.databases : database.name => database }
@@ -175,9 +175,9 @@ resource "postgresql_grant" "table_access" {
   schema      = each.value.schema
   object_type = each.value.object_type
   privileges  = each.value.privileges
-  objects     = each.value.objects
+  objects     = try(each.value.objects, null)
 
-  depends_on = [postgresql_database.logical_dbs]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.base_role, postgresql_role.dependent_role]
 }
 
 resource "postgresql_grant" "sequence_access" {
@@ -188,6 +188,7 @@ resource "postgresql_grant" "sequence_access" {
   schema      = each.value.schema
   object_type = each.value.object_type
   privileges  = each.value.privileges
+  objects     = try(each.value.objects, null)
 
   depends_on = [postgresql_database.logical_dbs, postgresql_role.base_role, postgresql_role.dependent_role]
 }

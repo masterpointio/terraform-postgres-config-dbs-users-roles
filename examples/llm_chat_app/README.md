@@ -102,6 +102,55 @@ Group roles (no login) use the `role_` prefix. Login roles do not have the prefi
 
 The `ref_data_*` schemas are managed by separate data pipelines that populate the document corpus used by the Chat Application's RAG (Retrieval-Augmented Generation) system.
 
+## Grant Configuration
+
+This example demonstrates two approaches for configuring database grants:
+
+### 1. Inline Grants (in `roles` variable)
+
+Use for grants that don't depend on schemas created by Terraform:
+
+```hcl
+roles = [
+  {
+    role = {
+      name = "role_service_migration"
+      login = false
+    }
+    database_grants = {
+      role = "role_service_migration"
+      database = "llm_service"
+      object_type = "database"
+      privileges = ["CREATE", "CONNECT", "TEMPORARY"]
+    }
+  }
+]
+```
+
+### 2. Separate Grant Variables (in `fixtures.auto.tfvars`)
+
+Use for grants on schemas created by Terraform. This data-driven approach replaces hundreds of lines of hardcoded resources:
+
+```hcl
+schema_grants = [
+  { role = "role_service_rw", database = "llm_service", schema = "app", privileges = ["USAGE"] },
+  { role = "role_service_ro", database = "llm_service", schema = "app", privileges = ["USAGE"] },
+]
+
+table_grants = [
+  { role = "role_service_rw", database = "llm_service", schema = "app", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
+  { role = "role_service_ro", database = "llm_service", schema = "app", privileges = ["SELECT"] },
+]
+
+default_privileges = [
+  { role = "role_service_rw", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
+]
+```
+
+**Supported grant types:** `schema_grants`, `table_grants`, `sequence_grants`, `default_privileges`
+
+The `objects` field in table/sequence grants is optional - omit it to grant on all objects in the schema.
+
 ## Schema Access Matrix
 
 |                     | app | ref_data_abc | ref_data_xyz |
