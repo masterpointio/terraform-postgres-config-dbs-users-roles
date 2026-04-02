@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/compare/v0.1.1...v0.1.2) (2026-04-02)
+
+
+### Bug Fixes
+
+* pin GitHub Actions to commit SHAs (INT-326) ([#21](https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/issues/21)) ([4b4aa73](https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/commit/4b4aa73121a3cd4aa015187112c0580985cbbf8d))
+
 ## [0.1.1](https://github.com/masterpointio/terraform-postgres-config-dbs-users-roles/compare/v0.1.0...v0.1.1) (2025-06-06)
 
 
