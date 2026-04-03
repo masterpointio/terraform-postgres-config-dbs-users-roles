@@ -1,11 +1,49 @@
+# llm_chat_app/variables.tf
+
+variable "db_hostname" {
+  type        = string
+  description = "The hostname of the database instance."
+}
+
+variable "db_username" {
+  type        = string
+  description = "The username of the database instance."
+}
+
+variable "db_password" {
+  type        = string
+  description = "The password of the database instance."
+  sensitive   = true
+}
+
+variable "db_port" {
+  type        = number
+  description = "The port of the database instance."
+}
+
+variable "db_scheme" {
+  type        = string
+  description = "The scheme of the database instance."
+}
+
+variable "db_superuser" {
+  type        = bool
+  description = "Whether the database instance is a superuser."
+}
+
+variable "db_sslmode" {
+  type        = string
+  description = "The SSL mode of the database instance."
+}
+
 variable "databases" {
   type = list(object({
     name             = string
-    connection_limit = optional(number)
+    connection_limit = number
   }))
-  default     = []
-  description = "The logical database to create and configure"
+  default = []
 }
+
 
 variable "roles" {
   type = list(object({
@@ -51,7 +89,7 @@ variable "roles" {
       object_type = string
       privileges  = list(string)
     })))
-    sequence_grants = optional(list(object({
+    table_grants = optional(list(object({
       role        = string
       database    = string
       schema      = string
@@ -59,7 +97,7 @@ variable "roles" {
       objects     = optional(list(string))
       privileges  = list(string)
     })))
-    table_grants = optional(list(object({
+    sequence_grants = optional(list(object({
       role        = string
       database    = string
       schema      = string
