@@ -68,8 +68,6 @@ Group roles (no login) use the `role_` prefix. Login roles do not.
 
 | Role                     | Type  | Purpose                                                 | Login | Connection Limit |
 | ------------------------ | ----- | ------------------------------------------------------- | ----- | ---------------- |
-| `role_pg_cluster_admin`  | Group | Holds CREATEROLE — manages users/roles cluster-wide     | No    | -                |
-| `pg_cluster_admin`       | Login | Terraform / DBA login; inherits cluster admin           | Yes   | -                |
 | `role_pg_monitoring`     | Group | Holds pg_monitor membership                             | No    | -                |
 | `pg_monitoring`          | Login | Datadog / Grafana login; inherits monitoring            | Yes   | -                |
 | `role_service_migration` | Group | Owns schemas and all DDL                                | No    | -                |
@@ -108,12 +106,9 @@ The `ref_data_*` schemas are managed by separate data pipelines that populate th
 ```mermaid
 flowchart TB
     subgraph cluster["Cluster-Wide Roles"]
-        role_admin["role_pg_cluster_admin<br/><i>no login • CREATEROLE</i>"]
-        pg_admin["pg_cluster_admin<br/><i>login • inherits cluster admin</i>"]
         role_monitoring["role_pg_monitoring<br/><i>no login • pg_monitor member</i>"]
         pg_monitoring["pg_monitoring<br/><i>login • inherits monitoring</i>"]
 
-        pg_admin -->|inherits| role_admin
         pg_monitoring -->|inherits| role_monitoring
     end
 
@@ -144,8 +139,8 @@ flowchart TB
     classDef loginRole fill:#e8f5e9,stroke:#2e7d32
     classDef migrationGroup fill:#fce4ec,stroke:#c2185b
 
-    class role_admin,role_monitoring clusterRole
-    class pg_admin,pg_monitoring clusterRole
+    class role_monitoring clusterRole
+    class pg_monitoring clusterRole
     class rw,ro groupRole
     class migration migrationGroup
     class migrator,fastapi_rw,fastapi_ro,pipeline_rw,pipeline_ro loginRole

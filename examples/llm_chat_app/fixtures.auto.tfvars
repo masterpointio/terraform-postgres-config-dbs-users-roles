@@ -26,26 +26,8 @@ roles = [
   # ========================================
   # Cluster-wide roles
   # ========================================
-
-  {
-    role = {
-      name            = "role_pg_cluster_admin"
-      login           = false
-      inherit         = true
-      create_role     = true
-      create_database = false
-    }
-  },
-
-  {
-    role = {
-      name     = "pg_cluster_admin"
-      login    = true
-      inherit  = true
-      roles    = ["role_pg_cluster_admin"]
-      password = "demo-password-cluster-admin"
-    }
-  },
+  # Note: admin_user (the RDS master user stored in SSM) serves as the cluster
+  # admin and is used by Terraform to connect. It does not need to be created here.
 
   {
     role = {
