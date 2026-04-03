@@ -41,7 +41,7 @@ chmod +x 1_apply_terraform.sh
 
 This runs `tofu apply -auto-approve` to create:
 
-- Database: `llm_service`
+- Database: `llm_chat_app`
 - Roles: migration, group roles (rw/ro), login roles (fastapi_rw, fastapi_ro, pipeline_rw, pipeline_ro)
 - Schemas: `app`, `ref_data_pipeline_abc`, `ref_data_pipeline_xyz`
 - Grants and default privileges
@@ -101,7 +101,7 @@ Example:
 ```bash
 export PGHOST=localhost
 export PGPORT=5432
-export PGDATABASE=llm_service
+export PGDATABASE=llm_chat_app
 
 PGUSER=service_fastapi_rw PGPASSWORD=demo-password-fastapi-rw psql -c "SELECT * FROM app.test_users;"
 ```

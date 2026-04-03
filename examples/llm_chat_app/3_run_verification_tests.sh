@@ -5,7 +5,7 @@ set -e
 
 export PGHOST=localhost
 export PGPORT=5432
-export PGDATABASE=llm_service
+export PGDATABASE=llm_chat_app
 
 echo "=============================================="
 echo "Running Verification Tests"

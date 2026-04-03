@@ -16,11 +16,11 @@ echo ""
 export PGUSER=admin_user
 export PGPASSWORD=insecure-pass-for-demo-admin-user
 
-echo "Step 1: Terminating connections to llm_service database..."
+echo "Step 1: Terminating connections to llm_chat_app database..."
 psql -c "
 SELECT pg_terminate_backend(pid)
 FROM pg_stat_activity
-WHERE datname = 'llm_service' AND pid <> pg_backend_pid();
+WHERE datname = 'llm_chat_app' AND pid <> pg_backend_pid();
 " 2>/dev/null || true
 
 echo ""

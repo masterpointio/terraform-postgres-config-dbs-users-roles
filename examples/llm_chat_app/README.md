@@ -1,6 +1,6 @@
 # Example: LLM Chat App Setup
 
-This example shows how to create a comprehensive role-based access control (RBAC) setup for an LLM pattern reviewer service with multiple schemas and permission boundaries.
+This example shows how to create a comprehensive role-based access control (RBAC) setup for an LLM chat application with multiple schemas and permission boundaries.
 
 ## Prerequisites
 
@@ -9,6 +9,7 @@ This example shows how to create a comprehensive role-based access control (RBAC
 2. **Create an admin user** with CREATEROLE privilege:
    ```bash
    psql postgres -c "CREATE ROLE admin_user LOGIN CREATEROLE PASSWORD 'insecure-pass-for-demo-admin-user';"
+   psql postgres -c "GRANT pg_monitor TO admin_user WITH ADMIN OPTION;"
    ```
 
 ## Usage
@@ -17,30 +18,26 @@ This example shows how to create a comprehensive role-based access control (RBAC
 cd examples/llm_chat_app
 
 # Initialize Terraform
-terraform init
+tofu init
 
 # Preview the changes
-terraform plan
+tofu plan
 
 # Apply the configuration
-terraform apply
+tofu apply
 ```
 
 ## Verify the Setup
 
-After `terraform apply` succeeds, run these tests to verify the RBAC configuration.
-
-### Set up environment
-
-```bash
-export PGHOST=localhost
-export PGPORT=5432
-export PGDATABASE=llm_service
-```
+After `tofu apply` succeeds, run these tests to verify the RBAC configuration.
 
 ### Quick smoke test
 
 ```bash
+export PGHOST=localhost
+export PGPORT=5432
+export PGDATABASE=llm_chat_app
+
 # Migration role can connect and create tables
 PGPASSWORD=demo-password-migrator psql -U service_migrator -c "
   CREATE TABLE app.smoke_test (id serial);
@@ -50,116 +47,59 @@ PGPASSWORD=demo-password-migrator psql -U service_migrator -c "
 
 # FastAPI RW can connect
 PGPASSWORD=demo-password-fastapi-rw psql -U service_fastapi_rw -c "SELECT 1 AS connected;"
-
-# Verify connection limits
-PGPASSWORD=demo-password-migrator psql -U service_migrator -c "
-  SELECT rolname, rolconnlimit
-  FROM pg_roles
-  WHERE rolname LIKE 'role_service_%' OR rolname LIKE 'service_%'
-  ORDER BY rolname;
-"
 ```
 
 ### Full test suite
-
-Run the included test scripts to verify all permissions:
 
 ```bash
 # Run all tests at once
 ./RUN_ALL_TESTS.sh
 
 # Or run steps individually:
-./1_apply_terraform.sh    # Apply the Terraform configuration
-./2_create_test_objects.sh # Create test tables/views/functions
-./3_run_verification_tests.sh # Verify RBAC permissions
-./4_cleanup.sh            # Clean up test objects and destroy infrastructure
+./1_apply_terraform.sh         # Apply the Terraform configuration
+./2_create_test_objects.sh     # Create test tables/views/functions
+./3_run_verification_tests.sh  # Verify RBAC permissions
+./4_cleanup.sh                 # Clean up test objects and destroy infrastructure
 ```
 
 ## Roles and Permissions
 
-Group roles (no login) use the `role_` prefix. Login roles do not have the prefix.
+Group roles (no login) use the `role_` prefix. Login roles do not.
 
-| Role                     | Purpose                                            | Login | Connection Limit |
-| ------------------------ | -------------------------------------------------- | ----- | ---------------- |
-| `role_pg_cluster_admin`  | Creates users/roles across the cluster (Terraform) | Yes   | -                |
-| `role_pg_monitoring`     | System stats access (Datadog, Grafana)             | Yes   | -                |
-| `role_service_migration` | Group role that owns database, schemas, all DDL    | No    | -                |
-| `service_migrator`       | Login role for CI/CD migrations                    | Yes   | 5                |
-| `role_service_rw`        | Group role for read/write on `app` schema          | No    | -                |
-| `role_service_ro`        | Group role for read-only on `app` schema           | No    | -                |
-| `service_fastapi_rw`     | FastAPI backend with write access                  | Yes   | 30               |
-| `service_fastapi_ro`     | FastAPI backend with read-only access              | Yes   | 30               |
-| `service_pipeline_rw`    | Data pipeline with write access to all schemas     | Yes   | 10               |
-| `service_pipeline_ro`    | Data pipeline with read-only access to all schemas | Yes   | 10               |
+| Role                     | Type  | Purpose                                                 | Login | Connection Limit |
+| ------------------------ | ----- | ------------------------------------------------------- | ----- | ---------------- |
+| `role_pg_cluster_admin`  | Group | Holds CREATEROLE — manages users/roles cluster-wide     | No    | -                |
+| `pg_cluster_admin`       | Login | Terraform / DBA login; inherits cluster admin           | Yes   | -                |
+| `role_pg_monitoring`     | Group | Holds pg_monitor membership                             | No    | -                |
+| `pg_monitoring`          | Login | Datadog / Grafana login; inherits monitoring            | Yes   | -                |
+| `role_service_migration` | Group | Owns schemas and all DDL                                | No    | -                |
+| `service_migrator`       | Login | CI/CD migrations login                                  | Yes   | 5                |
+| `role_service_rw`        | Group | Read/write on `app` schema                              | No    | -                |
+| `role_service_ro`        | Group | Read-only on `app` schema                               | No    | -                |
+| `service_fastapi_rw`     | Login | FastAPI backend with write access                       | Yes   | 30               |
+| `service_fastapi_ro`     | Login | FastAPI backend with read-only access                   | Yes   | 30               |
+| `service_pipeline_rw`    | Login | Data pipeline with write access to ref_data schemas     | Yes   | 10               |
+| `service_pipeline_ro`    | Login | Data pipeline with read-only access to ref_data schemas | Yes   | 10               |
 
 ## Schemas
 
-| Schema         | Purpose                                                            |
-| -------------- | ------------------------------------------------------------------ |
-| `app`          | LLM Chat Application tables (users, conversations, messages, etc.) |
-| `ref_data_abc` | Data pipeline for document corpus ingestion (supports RAG)         |
-| `ref_data_xyz` | Data pipeline for document corpus processing (supports RAG)        |
+| Schema                  | Purpose                                                            |
+| ----------------------- | ------------------------------------------------------------------ |
+| `app`                   | LLM Chat Application tables (users, conversations, messages, etc.) |
+| `ref_data_pipeline_abc` | Document corpus ingestion pipeline (supports RAG)                  |
+| `ref_data_pipeline_xyz` | Document corpus processing pipeline (supports RAG)                 |
 
 The `ref_data_*` schemas are managed by separate data pipelines that populate the document corpus used by the Chat Application's RAG (Retrieval-Augmented Generation) system.
 
-## Grant Configuration
-
-This example demonstrates two approaches for configuring database grants:
-
-### 1. Inline Grants (in `roles` variable)
-
-Use for grants that don't depend on schemas created by Terraform:
-
-```hcl
-roles = [
-  {
-    role = {
-      name = "role_service_migration"
-      login = false
-    }
-    database_grants = {
-      role = "role_service_migration"
-      database = "llm_service"
-      object_type = "database"
-      privileges = ["CREATE", "CONNECT", "TEMPORARY"]
-    }
-  }
-]
-```
-
-### 2. Separate Grant Variables (in `fixtures.auto.tfvars`)
-
-Use for grants on schemas created by Terraform. This data-driven approach replaces hundreds of lines of hardcoded resources:
-
-```hcl
-schema_grants = [
-  { role = "role_service_rw", database = "llm_service", schema = "app", privileges = ["USAGE"] },
-  { role = "role_service_ro", database = "llm_service", schema = "app", privileges = ["USAGE"] },
-]
-
-table_grants = [
-  { role = "role_service_rw", database = "llm_service", schema = "app", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
-  { role = "role_service_ro", database = "llm_service", schema = "app", privileges = ["SELECT"] },
-]
-
-default_privileges = [
-  { role = "role_service_rw", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
-]
-```
-
-**Supported grant types:** `schema_grants`, `table_grants`, `sequence_grants`, `default_privileges`
-
-The `objects` field in table/sequence grants is optional - omit it to grant on all objects in the schema.
-
 ## Schema Access Matrix
 
-|                     | app | ref_data_abc | ref_data_xyz |
-| ------------------- | --- | ------------ | ------------ |
-| service_migrator    | DDL | DDL          | DDL          |
-| service_fastapi_rw  | RW  | -            | -            |
-| service_fastapi_ro  | RO  | -            | -            |
-| service_pipeline_rw | RW  | RW           | RW           |
-| service_pipeline_ro | RO  | RO           | RO           |
+|                       | app | ref_data_pipeline_abc | ref_data_pipeline_xyz |
+| --------------------- | --- | --------------------- | --------------------- |
+| `service_migrator`    | DDL | DDL                   | DDL                   |
+| `service_fastapi_rw`  | RW  | -                     | -                     |
+| `service_fastapi_ro`  | RO  | -                     | -                     |
+| `service_pipeline_rw` | RW  | RW                    | RW                    |
+| `service_pipeline_ro` | RO  | RO                    | RO                    |
 
 **Legend:** DDL = CREATE/ALTER/DROP, RW = CRUD, RO = SELECT only
 
@@ -168,11 +108,16 @@ The `objects` field in table/sequence grants is optional - omit it to grant on a
 ```mermaid
 flowchart TB
     subgraph cluster["Cluster-Wide Roles"]
-        admin["role_pg_cluster_admin<br/><i>login • creates roles</i>"]
-        monitoring["role_pg_monitoring<br/><i>login • pg_monitor member</i>"]
+        role_admin["role_pg_cluster_admin<br/><i>no login • CREATEROLE</i>"]
+        pg_admin["pg_cluster_admin<br/><i>login • inherits cluster admin</i>"]
+        role_monitoring["role_pg_monitoring<br/><i>no login • pg_monitor member</i>"]
+        pg_monitoring["pg_monitoring<br/><i>login • inherits monitoring</i>"]
+
+        pg_admin -->|inherits| role_admin
+        pg_monitoring -->|inherits| role_monitoring
     end
 
-    subgraph service["Service-Scoped Roles (llm_service)"]
+    subgraph service["Service-Scoped Roles (llm_chat_app)"]
         subgraph groups["Group Roles (no login)"]
             migration["role_service_migration<br/><i>DDL on all schemas</i>"]
             rw["role_service_rw<br/><i>DML on app schema</i>"]
@@ -186,36 +131,24 @@ flowchart TB
             pipeline_rw["service_pipeline_rw<br/><i>conn_limit=10</i>"]
             pipeline_ro["service_pipeline_ro<br/><i>conn_limit=10</i>"]
         end
-
-        subgraph devs["Developer Accounts"]
-            senior["Senior Developers"]
-            junior["Junior/Mid Developers"]
-        end
     end
 
-    %% Inheritance arrows
     migrator -->|inherits| migration
-
     fastapi_rw -->|inherits| rw
-    pipeline_rw -->|inherits| rw
-    senior -->|inherits| rw
-
     fastapi_ro -->|inherits| ro
+    pipeline_rw -->|inherits| rw
     pipeline_ro -->|inherits| ro
-    junior -->|inherits| ro
 
-    %% Styling
     classDef clusterRole fill:#e1f5fe,stroke:#01579b
     classDef groupRole fill:#fff3e0,stroke:#e65100
     classDef loginRole fill:#e8f5e9,stroke:#2e7d32
-    classDef devRole fill:#f3e5f5,stroke:#7b1fa2
     classDef migrationGroup fill:#fce4ec,stroke:#c2185b
 
-    class admin,monitoring clusterRole
+    class role_admin,role_monitoring clusterRole
+    class pg_admin,pg_monitoring clusterRole
     class rw,ro groupRole
     class migration migrationGroup
     class migrator,fastapi_rw,fastapi_ro,pipeline_rw,pipeline_ro loginRole
-    class senior,junior devRole
 ```
 
 ## Schema Access Diagram
@@ -223,17 +156,17 @@ flowchart TB
 ```mermaid
 flowchart TB
     subgraph ddl_access["DDL Access (Schema Owner)"]
-        migration["migration"]
+        migration["service_migrator"]
     end
 
     subgraph app_only["App Schema Only"]
-        fastapi_rw["fastapi_rw"]
-        fastapi_ro["fastapi_ro"]
+        fastapi_rw["service_fastapi_rw"]
+        fastapi_ro["service_fastapi_ro"]
     end
 
     subgraph all_schemas["All Schemas Access"]
-        pipeline_rw["pipeline_rw"]
-        pipeline_ro["pipeline_ro"]
+        pipeline_rw["service_pipeline_rw"]
+        pipeline_ro["service_pipeline_ro"]
     end
 
     subgraph schemas["Schemas"]
@@ -243,16 +176,13 @@ flowchart TB
         ref_xyz["ref_data_pipeline_xyz"]
     end
 
-    %% DDL access - straight down to all schemas
     migration -->|DDL| app
     migration -->|DDL| ref_abc
     migration -->|DDL| ref_xyz
 
-    %% App-only roles - single path to app schema
     fastapi_rw -->|RW| app
     fastapi_ro -->|RO| app
 
-    %% Pipeline roles - access all schemas
     pipeline_rw -->|RW| app
     pipeline_rw -->|RW| ref_abc
     pipeline_rw -->|RW| ref_xyz
@@ -261,7 +191,6 @@ flowchart TB
     pipeline_ro -->|RO| ref_abc
     pipeline_ro -->|RO| ref_xyz
 
-    %% Styling
     classDef schemaNode fill:#e3f2fd,stroke:#1565c0
     classDef ddlRole fill:#fce4ec,stroke:#c2185b
     classDef rwRole fill:#e8f5e9,stroke:#2e7d32
@@ -277,13 +206,11 @@ flowchart TB
 
 ## Cleanup
 
-To tear down the example infrastructure:
-
 ```bash
 ./4_cleanup.sh
 ```
 
-This drops test objects and runs `terraform destroy` to remove all created roles, grants, and the database.
+This drops test objects and runs `tofu destroy` to remove all created roles, grants, and the database.
 
 ## Note about authentication on Mac
 

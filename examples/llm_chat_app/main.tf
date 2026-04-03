@@ -16,21 +16,21 @@ resource "postgresql_database" "databases" {
 
 resource "postgresql_schema" "app" {
   name     = "app"
-  database = "llm_service"
+  database = "llm_chat_app"
 
   depends_on = [postgresql_database.databases]
 }
 
 resource "postgresql_schema" "ref_data_pipeline_abc" {
   name     = "ref_data_pipeline_abc"
-  database = "llm_service"
+  database = "llm_chat_app"
 
   depends_on = [postgresql_database.databases]
 }
 
 resource "postgresql_schema" "ref_data_pipeline_xyz" {
   name     = "ref_data_pipeline_xyz"
-  database = "llm_service"
+  database = "llm_chat_app"
 
   depends_on = [postgresql_database.databases]
 }
@@ -60,7 +60,7 @@ module "postgres_automation" {
 # ========================================
 
 resource "postgresql_grant" "revoke_public_connect" {
-  database    = "llm_service"
+  database    = "llm_chat_app"
   role        = "public"
   object_type = "database"
   privileges  = []
@@ -69,7 +69,7 @@ resource "postgresql_grant" "revoke_public_connect" {
 }
 
 resource "postgresql_grant" "revoke_public_schema" {
-  database    = "llm_service"
+  database    = "llm_chat_app"
   role        = "public"
   schema      = "public"
   object_type = "schema"

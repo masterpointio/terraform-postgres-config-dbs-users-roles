@@ -15,7 +15,7 @@ db_sslmode   = "disable"
 # Database configuration
 databases = [
   {
-    name             = "llm_service"
+    name             = "llm_chat_app"
     connection_limit = 100
   }
 ]
@@ -30,20 +30,38 @@ roles = [
   {
     role = {
       name            = "role_pg_cluster_admin"
-      login           = true
+      login           = false
       inherit         = true
       create_role     = true
       create_database = false
-      password        = "demo-password-cluster-admin"
     }
   },
 
   {
     role = {
-      name     = "role_pg_monitoring"
+      name     = "pg_cluster_admin"
       login    = true
       inherit  = true
-      roles    = ["pg_monitor"]
+      roles    = ["role_pg_cluster_admin"]
+      password = "demo-password-cluster-admin"
+    }
+  },
+
+  {
+    role = {
+      name    = "role_pg_monitoring"
+      login   = false
+      inherit = true
+      roles   = ["pg_monitor"]
+    }
+  },
+
+  {
+    role = {
+      name     = "pg_monitoring"
+      login    = true
+      inherit  = true
+      roles    = ["role_pg_monitoring"]
       password = "demo-password-monitoring"
     }
   },
@@ -60,24 +78,24 @@ roles = [
     }
     database_grants = {
       role        = "role_service_migration"
-      database    = "llm_service"
+      database    = "llm_chat_app"
       object_type = "database"
       privileges  = ["CREATE", "CONNECT", "TEMPORARY"]
     }
     schema_grants = [
-      { role = "role_service_migration", database = "llm_service", schema = "app", object_type = "schema", privileges = ["USAGE", "CREATE"] },
-      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "schema", privileges = ["USAGE", "CREATE"] },
-      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "schema", privileges = ["USAGE", "CREATE"] },
+      { role = "role_service_migration", database = "llm_chat_app", schema = "app", object_type = "schema", privileges = ["USAGE", "CREATE"] },
+      { role = "role_service_migration", database = "llm_chat_app", schema = "ref_data_pipeline_abc", object_type = "schema", privileges = ["USAGE", "CREATE"] },
+      { role = "role_service_migration", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", object_type = "schema", privileges = ["USAGE", "CREATE"] },
     ]
     table_grants = [
-      { role = "role_service_migration", database = "llm_service", schema = "app", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] },
-      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] },
-      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] },
+      { role = "role_service_migration", database = "llm_chat_app", schema = "app", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] },
+      { role = "role_service_migration", database = "llm_chat_app", schema = "ref_data_pipeline_abc", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] },
+      { role = "role_service_migration", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] },
     ]
     sequence_grants = [
-      { role = "role_service_migration", database = "llm_service", schema = "app", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
-      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
-      { role = "role_service_migration", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "role_service_migration", database = "llm_chat_app", schema = "app", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "role_service_migration", database = "llm_chat_app", schema = "ref_data_pipeline_abc", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "role_service_migration", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
     ]
   },
 
@@ -105,23 +123,23 @@ roles = [
     }
     database_grants = {
       role        = "role_service_rw"
-      database    = "llm_service"
+      database    = "llm_chat_app"
       object_type = "database"
       privileges  = ["CONNECT"]
     }
     schema_grants = [
-      { role = "role_service_rw", database = "llm_service", schema = "app", object_type = "schema", privileges = ["USAGE"] },
+      { role = "role_service_rw", database = "llm_chat_app", schema = "app", object_type = "schema", privileges = ["USAGE"] },
     ]
     table_grants = [
-      { role = "role_service_rw", database = "llm_service", schema = "app", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
+      { role = "role_service_rw", database = "llm_chat_app", schema = "app", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
     ]
     sequence_grants = [
-      { role = "role_service_rw", database = "llm_service", schema = "app", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "role_service_rw", database = "llm_chat_app", schema = "app", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
     ]
     default_privileges = [
-      { role = "role_service_rw", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
-      { role = "role_service_rw", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
-      { role = "role_service_rw", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+      { role = "role_service_rw", database = "llm_chat_app", schema = "app", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"] },
+      { role = "role_service_rw", database = "llm_chat_app", schema = "app", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "role_service_rw", database = "llm_chat_app", schema = "app", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
     ]
   },
 
@@ -137,23 +155,23 @@ roles = [
     }
     database_grants = {
       role        = "role_service_ro"
-      database    = "llm_service"
+      database    = "llm_chat_app"
       object_type = "database"
       privileges  = ["CONNECT"]
     }
     schema_grants = [
-      { role = "role_service_ro", database = "llm_service", schema = "app", object_type = "schema", privileges = ["USAGE"] },
+      { role = "role_service_ro", database = "llm_chat_app", schema = "app", object_type = "schema", privileges = ["USAGE"] },
     ]
     table_grants = [
-      { role = "role_service_ro", database = "llm_service", schema = "app", object_type = "table", privileges = ["SELECT"] },
+      { role = "role_service_ro", database = "llm_chat_app", schema = "app", object_type = "table", privileges = ["SELECT"] },
     ]
     sequence_grants = [
-      { role = "role_service_ro", database = "llm_service", schema = "app", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "role_service_ro", database = "llm_chat_app", schema = "app", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
     ]
     default_privileges = [
-      { role = "role_service_ro", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "table", privileges = ["SELECT"] },
-      { role = "role_service_ro", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
-      { role = "role_service_ro", database = "llm_service", schema = "app", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+      { role = "role_service_ro", database = "llm_chat_app", schema = "app", owner = "role_service_migration", object_type = "table", privileges = ["SELECT"] },
+      { role = "role_service_ro", database = "llm_chat_app", schema = "app", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "role_service_ro", database = "llm_chat_app", schema = "app", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
     ]
   },
 
@@ -197,24 +215,24 @@ roles = [
       password         = "demo-password-pipeline-rw"
     }
     schema_grants = [
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "schema", privileges = ["USAGE"] },
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "schema", privileges = ["USAGE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_abc", object_type = "schema", privileges = ["USAGE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", object_type = "schema", privileges = ["USAGE"] },
     ]
     table_grants = [
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_abc", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
     ]
     sequence_grants = [
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_abc", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
     ]
     default_privileges = [
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
-      { role = "service_pipeline_rw", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "table", privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT", "UPDATE"] },
+      { role = "service_pipeline_rw", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
     ]
   },
 
@@ -228,24 +246,24 @@ roles = [
       password         = "demo-password-pipeline-ro"
     }
     schema_grants = [
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "schema", privileges = ["USAGE"] },
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "schema", privileges = ["USAGE"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_abc", object_type = "schema", privileges = ["USAGE"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", object_type = "schema", privileges = ["USAGE"] },
     ]
     table_grants = [
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "table", privileges = ["SELECT"] },
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "table", privileges = ["SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_abc", object_type = "table", privileges = ["SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", object_type = "table", privileges = ["SELECT"] },
     ]
     sequence_grants = [
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_abc", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
     ]
     default_privileges = [
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "table", privileges = ["SELECT"] },
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "table", privileges = ["SELECT"] },
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
-      { role = "service_pipeline_ro", database = "llm_service", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "table", privileges = ["SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_abc", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "table", privileges = ["SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "sequence", privileges = ["USAGE", "SELECT"] },
+      { role = "service_pipeline_ro", database = "llm_chat_app", schema = "ref_data_pipeline_xyz", owner = "role_service_migration", object_type = "function", privileges = ["EXECUTE"] },
     ]
   },
 ]
