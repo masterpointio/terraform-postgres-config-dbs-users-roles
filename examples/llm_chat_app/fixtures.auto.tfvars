@@ -40,7 +40,7 @@ roles = [
 
   {
     role = {
-      name     = "pg_monitoring"
+      name     = "custom_pg_monitoring"
       login    = true
       inherit  = true
       roles    = ["role_pg_monitoring"]

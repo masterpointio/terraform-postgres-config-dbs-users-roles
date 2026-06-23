@@ -69,7 +69,7 @@ Group roles (no login) use the `role_` prefix. Login roles do not.
 | Role                     | Type  | Purpose                                                 | Login | Connection Limit |
 | ------------------------ | ----- | ------------------------------------------------------- | ----- | ---------------- |
 | `role_pg_monitoring`     | Group | Holds pg_monitor membership                             | No    | -                |
-| `pg_monitoring`          | Login | Datadog / Grafana login; inherits monitoring            | Yes   | -                |
+| `custom_pg_monitoring`   | Login | Datadog / Grafana login; inherits monitoring            | Yes   | -                |
 | `role_service_migration` | Group | Owns schemas and all DDL                                | No    | -                |
 | `service_migrator`       | Login | CI/CD migrations login                                  | Yes   | 5                |
 | `role_service_rw`        | Group | Read/write on `app` schema                              | No    | -                |
@@ -107,7 +107,7 @@ The `ref_data_*` schemas are managed by separate data pipelines that populate th
 flowchart TB
     subgraph cluster["Cluster-Wide Roles"]
         role_monitoring["role_pg_monitoring<br/><i>no login • pg_monitor member</i>"]
-        pg_monitoring["pg_monitoring<br/><i>login • inherits monitoring</i>"]
+        pg_monitoring["custom_pg_monitoring<br/><i>login • inherits monitoring</i>"]
 
         pg_monitoring -->|inherits| role_monitoring
     end
