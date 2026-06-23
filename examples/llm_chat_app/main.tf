@@ -1,11 +1,20 @@
 # llm_chat_app/main.tf
 
 # ========================================
+# Connection settings, databases, and roles/grants are all declared in
+# config.yaml and loaded here. providers.tf consumes local.config.connection.
+# ========================================
+
+locals {
+  config = yamldecode(file("${path.module}/config.yaml"))
+}
+
+# ========================================
 # Database (managed here so schemas can depend on it before the module runs)
 # ========================================
 
 resource "postgresql_database" "databases" {
-  for_each         = { for db in var.databases : db.name => db }
+  for_each         = { for db in local.config.databases : db.name => db }
   name             = each.value.name
   connection_limit = each.value.connection_limit
 }
@@ -45,7 +54,7 @@ module "postgres_automation" {
   source = "../../"
 
   databases = []
-  roles     = var.roles
+  roles     = local.config.roles
 
   depends_on = [
     postgresql_database.databases,
