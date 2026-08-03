@@ -49,30 +49,29 @@ variables {
             object_type = "database"
             privileges = ["CONNECT"]
         }
-        schema_grants = {
+        schema_grants = [{
           role        = "app_user"
           database    = "app2"
           schema      = "public"
           object_type = "schema"
-          objects     = ["public"]
           privileges  = ["USAGE"]
-        }
-        sequence_grants = {
+        }]
+        sequence_grants = [{
             role        = "app_user"
             database    = "app2"
             schema      = "public"
             object_type = "sequence"
             objects     = [] # all sequences
             privileges  = ["USAGE", "SELECT"]
-        }
-        table_grants = {
+        }]
+        table_grants = [{
             role        = "app_user"
             database    = "app2"
             schema      = "public"
             object_type = "table"
             objects     = [] # all tables
             privileges  = ["SELECT"]
-        }
+        }]
     }, {
         role = {
             name = "app_user2"
@@ -186,9 +185,9 @@ run "validate_roles_with_password" {
   }
 
   assert {
-    condition     = postgresql_role.role["app_user"].password == "app_user_password"
+    condition     = postgresql_role.base_role["app_user"].password == "app_user_password"
     error_message = "Role should have correct password"
-  } 
+  }
 }
 
 
@@ -200,12 +199,12 @@ run "validate_roles_with_random_password" {
   }
 
   assert {
-    condition     = length(postgresql_role.role["app_user2"].password) == 33
+    condition     = length(postgresql_role.base_role["app_user2"].password) == 33
     error_message = "Role should have random password"
   }
 
   assert {
-    condition = alltrue([for c in ["!", "#", "$", "%", "^", "&", "*", "(", ")", "<", ">", "-", "_"] : length(split(c, postgresql_role.role["app_user2"].password)) == 1])
+    condition     = alltrue([for c in ["!", "#", "$", "%", "^", "&", "*", "(", ")", "<", ">", "-", "_"] : length(split(c, postgresql_role.base_role["app_user2"].password)) == 1])
     error_message = "Password contains forbidden special characters"
   }
 }
