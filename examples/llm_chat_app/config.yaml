@@ -30,7 +30,6 @@ databases:
 # Roles and grants
 # ========================================
 roles:
-
   # Cluster-wide roles
   # Note: admin_user (the RDS master user stored in SSM) serves as the cluster
   # admin and is used by Terraform to connect. It does not need to be created here.
@@ -62,16 +61,51 @@ roles:
         - TEMPORARY
     schema_grants:
       - { database: llm_chat_app, schema: app, privileges: ["USAGE", "CREATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, privileges: ["USAGE", "CREATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, privileges: ["USAGE", "CREATE"] }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          privileges: ["USAGE", "CREATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          privileges: ["USAGE", "CREATE"],
+        }
     table_grants:
-      - { database: llm_chat_app, schema: app, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"] }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          privileges:
+            ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          privileges:
+            ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          privileges:
+            ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES"],
+        }
     sequence_grants:
-      - { database: llm_chat_app, schema: app, privileges: ["USAGE", "SELECT", "UPDATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, privileges: ["USAGE", "SELECT", "UPDATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, privileges: ["USAGE", "SELECT", "UPDATE"] }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          privileges: ["USAGE", "SELECT", "UPDATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          privileges: ["USAGE", "SELECT", "UPDATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          privileges: ["USAGE", "SELECT", "UPDATE"],
+        }
 
   # Migration login role - inherits from migration group
   - role:
@@ -93,13 +127,39 @@ roles:
     schema_grants:
       - { database: llm_chat_app, schema: app, privileges: ["USAGE"] }
     table_grants:
-      - { database: llm_chat_app, schema: app, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE"] }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          privileges: ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        }
     sequence_grants:
-      - { database: llm_chat_app, schema: app, privileges: ["USAGE", "SELECT", "UPDATE"] }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          privileges: ["USAGE", "SELECT", "UPDATE"],
+        }
     default_privileges:
-      - { database: llm_chat_app, schema: app, owner: role_service_migration, object_type: table, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE"] }
-      - { database: llm_chat_app, schema: app, owner: role_service_migration, object_type: sequence, privileges: ["USAGE", "SELECT", "UPDATE"] }
-      - { database: llm_chat_app, schema: app, owner: role_service_migration, object_type: function, privileges: ["EXECUTE"] }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          owner: role_service_migration,
+          object_type: table,
+          privileges: ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          owner: role_service_migration,
+          object_type: sequence,
+          privileges: ["USAGE", "SELECT", "UPDATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          owner: role_service_migration,
+          object_type: function,
+          privileges: ["EXECUTE"],
+        }
 
   # RO group role - read-only on app schema
   - role:
@@ -117,9 +177,27 @@ roles:
     sequence_grants:
       - { database: llm_chat_app, schema: app, privileges: ["USAGE", "SELECT"] }
     default_privileges:
-      - { database: llm_chat_app, schema: app, owner: role_service_migration, object_type: table, privileges: ["SELECT"] }
-      - { database: llm_chat_app, schema: app, owner: role_service_migration, object_type: sequence, privileges: ["USAGE", "SELECT"] }
-      - { database: llm_chat_app, schema: app, owner: role_service_migration, object_type: function, privileges: ["EXECUTE"] }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          owner: role_service_migration,
+          object_type: table,
+          privileges: ["SELECT"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          owner: role_service_migration,
+          object_type: sequence,
+          privileges: ["USAGE", "SELECT"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: app,
+          owner: role_service_migration,
+          object_type: function,
+          privileges: ["EXECUTE"],
+        }
 
   # Login roles - app schema (inherit from rw/ro)
   - role:
@@ -149,21 +227,81 @@ roles:
       connection_limit: 10
       password: demo-password-pipeline-rw
     schema_grants:
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, privileges: ["USAGE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, privileges: ["USAGE"] }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          privileges: ["USAGE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          privileges: ["USAGE"],
+        }
     table_grants:
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"],
+        }
     sequence_grants:
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, privileges: ["USAGE", "SELECT", "UPDATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, privileges: ["USAGE", "SELECT", "UPDATE"] }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          privileges: ["USAGE", "SELECT", "UPDATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          privileges: ["USAGE", "SELECT", "UPDATE"],
+        }
     default_privileges:
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, owner: role_service_migration, object_type: table, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, owner: role_service_migration, object_type: sequence, privileges: ["USAGE", "SELECT", "UPDATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, owner: role_service_migration, object_type: function, privileges: ["EXECUTE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, owner: role_service_migration, object_type: table, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, owner: role_service_migration, object_type: sequence, privileges: ["USAGE", "SELECT", "UPDATE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, owner: role_service_migration, object_type: function, privileges: ["EXECUTE"] }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          owner: role_service_migration,
+          object_type: table,
+          privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          owner: role_service_migration,
+          object_type: sequence,
+          privileges: ["USAGE", "SELECT", "UPDATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          owner: role_service_migration,
+          object_type: function,
+          privileges: ["EXECUTE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          owner: role_service_migration,
+          object_type: table,
+          privileges: ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          owner: role_service_migration,
+          object_type: sequence,
+          privileges: ["USAGE", "SELECT", "UPDATE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          owner: role_service_migration,
+          object_type: function,
+          privileges: ["EXECUTE"],
+        }
 
   - role:
       name: service_pipeline_ro
@@ -173,18 +311,78 @@ roles:
       connection_limit: 10
       password: demo-password-pipeline-ro
     schema_grants:
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, privileges: ["USAGE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, privileges: ["USAGE"] }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          privileges: ["USAGE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          privileges: ["USAGE"],
+        }
     table_grants:
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, privileges: ["SELECT"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, privileges: ["SELECT"] }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          privileges: ["SELECT"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          privileges: ["SELECT"],
+        }
     sequence_grants:
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, privileges: ["USAGE", "SELECT"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, privileges: ["USAGE", "SELECT"] }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          privileges: ["USAGE", "SELECT"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          privileges: ["USAGE", "SELECT"],
+        }
     default_privileges:
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, owner: role_service_migration, object_type: table, privileges: ["SELECT"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, owner: role_service_migration, object_type: sequence, privileges: ["USAGE", "SELECT"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_abc, owner: role_service_migration, object_type: function, privileges: ["EXECUTE"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, owner: role_service_migration, object_type: table, privileges: ["SELECT"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, owner: role_service_migration, object_type: sequence, privileges: ["USAGE", "SELECT"] }
-      - { database: llm_chat_app, schema: ref_data_pipeline_xyz, owner: role_service_migration, object_type: function, privileges: ["EXECUTE"] }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          owner: role_service_migration,
+          object_type: table,
+          privileges: ["SELECT"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          owner: role_service_migration,
+          object_type: sequence,
+          privileges: ["USAGE", "SELECT"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_abc,
+          owner: role_service_migration,
+          object_type: function,
+          privileges: ["EXECUTE"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          owner: role_service_migration,
+          object_type: table,
+          privileges: ["SELECT"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          owner: role_service_migration,
+          object_type: sequence,
+          privileges: ["USAGE", "SELECT"],
+        }
+      - {
+          database: llm_chat_app,
+          schema: ref_data_pipeline_xyz,
+          owner: role_service_migration,
+          object_type: function,
+          privileges: ["EXECUTE"],
+        }
