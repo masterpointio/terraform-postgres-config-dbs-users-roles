@@ -359,3 +359,49 @@ run "grant_object_type_defaults_to_list_type" {
     error_message = "sequence_grants[].object_type should default to \"sequence\""
   }
 }
+
+# -----------------------------------------------------------------------------
+# Test: Duplicate role names are rejected by var.roles validation
+# -----------------------------------------------------------------------------
+
+run "duplicate_role_names_are_rejected" {
+  command = plan
+
+  providers = {
+    postgresql = postgresql.mock
+  }
+
+  variables {
+    databases = []
+    roles = [
+      { name = "app_user" },
+      { name = "app_user" },
+    ]
+  }
+
+  expect_failures = [var.roles]
+}
+
+# -----------------------------------------------------------------------------
+# Test: Duplicates split across base and dependent roles are also rejected
+# (without validation these plan cleanly and only fail at apply time)
+# -----------------------------------------------------------------------------
+
+run "duplicate_role_names_across_base_and_dependent_are_rejected" {
+  command = plan
+
+  providers = {
+    postgresql = postgresql.mock
+  }
+
+  variables {
+    databases = []
+    roles = [
+      { name = "app_group" },
+      { name = "app_user" },
+      { name = "app_user", roles = ["app_group"] },
+    ]
+  }
+
+  expect_failures = [var.roles]
+}

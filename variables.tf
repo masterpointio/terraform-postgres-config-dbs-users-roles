@@ -70,4 +70,9 @@ variable "roles" {
   }))
   default     = []
   description = "List of static postgres roles to create and related permissions. These are for applications that use static credentials and don't use IAM DB Auth. See defaults: https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_role"
+
+  validation {
+    condition     = length(distinct([for role in var.roles : role.name])) == length(var.roles)
+    error_message = "Each role in var.roles must have a unique `name`."
+  }
 }
