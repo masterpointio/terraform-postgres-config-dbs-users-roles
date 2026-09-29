@@ -20,64 +20,60 @@ databases = [
 
 roles = [
   {
-    role = {
-      name      = "system_user"
-      login     = true
-      superuser = false
-      password  = "insecure-pass-for-demo-system-user"
-    }
+    name      = "system_user"
+    login     = true
+    superuser = false
+    password  = "insecure-pass-for-demo-system-user"
 
-    table_grants = {
+    table_grants = [{
       role        = "system_user"
       database    = "app"
       schema      = "public"
       object_type = "table"
       objects     = [] # empty list to grant all tables
       privileges  = ["ALL"]
-    }
+    }]
 
-    schema_grants = {
+    schema_grants = [{
       role        = "system_user"
       database    = "app"
       schema      = "public"
       object_type = "schema"
       privileges  = ["USAGE", "CREATE"]
-    }
+    }]
 
-    sequence_grants = {
+    sequence_grants = [{
       role        = "system_user"
       database    = "app"
       schema      = "public"
       object_type = "sequence"
       objects     = [] # empty list to grant all sequences
       privileges  = ["ALL"]
-    }
+    }]
   },
   {
-    role = {
-      name      = "readonly_user"
-      login     = true
-      password  = "insecure-pass-for-demo-readonly-user"
-      superuser = false
-    }
+    name      = "readonly_user"
+    login     = true
+    password  = "insecure-pass-for-demo-readonly-user"
+    superuser = false
 
-    table_grants = {
+    table_grants = [{
       role        = "readonly_user"
       database    = "app"
       schema      = "public"
       object_type = "table"
       objects     = [] # empty list to grant all tables
       privileges  = ["SELECT"]
-    }
+    }]
 
-    sequence_grants = {
+    sequence_grants = [{
       role        = "readonly_user"
       database    = "app"
       schema      = "public"
       object_type = "sequence"
       objects     = [] # empty list to grant all sequences
       privileges  = ["USAGE", "SELECT"]
-    }
+    }]
 
     default_privileges = [
       {
@@ -86,7 +82,6 @@ roles = [
         schema      = "public"
         owner       = "system_user"
         object_type = "table"
-        objects     = [] # empty list to grant all tables
         privileges  = ["SELECT"]
       },
       {
@@ -95,7 +90,6 @@ roles = [
         schema      = "public"
         owner       = "system_user"
         object_type = "sequence"
-        objects     = [] # empty list to grant all sequences
         privileges  = ["USAGE", "SELECT"]
       },
     ]
