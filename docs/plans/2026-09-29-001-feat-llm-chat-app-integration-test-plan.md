@@ -8,8 +8,6 @@ product_contract_source: ce-plan-bootstrap
 execution: code
 ---
 
-# feat: Live integration test for llm_chat_app on Postgres 15 and 17
-
 ## Goal Capsule
 
 - **Objective:** Add a GitHub Actions workflow that applies `examples/llm_chat_app` to a live Postgres 15 and a live Postgres 17. It fails on post-apply drift, runs the example's verification scripts, and reports results visibly without blocking merges.
@@ -28,7 +26,9 @@ Add one workflow, `.github/workflows/integration-test.yaml`. Each matrix leg (Po
 
 ### Problem Frame
 
-The module is only verified by `tofu test` against locals and by manual local runs of the example. Nothing proves the grants work on a real server, and nothing proves they work across Postgres major versions. PG16 changed `CREATEROLE` semantics. A non-superuser now needs `ADMIN OPTION` to grant membership in roles it did not create. A `CREATEROLE` creator also gets only `ADMIN` (not `SET`/`INHERIT`) on roles it creates, unless `createrole_self_grant` is set. The example runs as a non-superuser (`superuser: false` in `examples/llm_chat_app/config.yaml`), so it sits directly on that behavior change.
+The module is only verified by `tofu test` against locals and by manual local runs of the example. Nothing proves the grants work on a real server, and nothing proves they work across Postgres major versions. PG16 changed `CREATEROLE` semantics.
+A non-superuser now needs `ADMIN OPTION` to grant membership in roles it did not create. A `CREATEROLE` creator also gets only `ADMIN` (not `SET`/`INHERIT`) on roles it creates, unless `createrole_self_grant` is set.
+The example runs as a non-superuser (`superuser: false` in `examples/llm_chat_app/config.yaml`), so it sits directly on that behavior change.
 
 ### Requirements
 
@@ -59,12 +59,17 @@ The module is only verified by `tofu test` against locals and by manual local ru
 ### Key Technical Decisions
 
 - KTD1. Trigger on `pull_request`, `push: main`, and `workflow_dispatch`, not `pull_request_target`. (session-settled: user-approved — chosen over `pull_request_target`: no secrets are needed, so fork code runs without secret exposure and zizmor stays clean.) Governs R5.
-- KTD2. Use a matrix over Postgres versions with `fail-fast: false` and a `postgres:<version>` service container on `5432:5432`. (session-settled: user-approved — chosen over testing latest only: 15 is pre-PG16 `CREATEROLE`, 17 is post.) The service sets `env: POSTGRES_PASSWORD: postgres` (the image will not start without it) and `options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10` so steps wait for a ready server. Governs R1, R4.
+- KTD2. Use a matrix over Postgres versions with `fail-fast: false` and a `postgres:<version>` service container on `5432:5432`.
+  (session-settled: user-approved — chosen over testing latest only: 15 is pre-PG16 `CREATEROLE`, 17 is post.) The service sets `env: POSTGRES_PASSWORD: postgres` (the image will not start without it) and `options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10` so steps wait for a ready server.
+  Governs R1, R4.
 - KTD3. Reuse the example scripts unchanged. Call the numbered scripts individually instead of `RUN_ALL_TESTS.sh` so the drift gate fits between apply and fixtures. (session-settled: user-approved — chosen over a `tofu test` rewrite.) Governs R2.
-- KTD4. Bootstrap `admin_user` in a workflow step as the container superuser (`PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres`). Grant `LOGIN CREATEROLE CREATEDB` with the demo password from `config.yaml`, plus `GRANT pg_monitor TO admin_user WITH ADMIN OPTION`. Service containers cannot run init SQL, so a `psql -v ON_ERROR_STOP=1` step is the simplest seam. `CREATEDB` is required because `examples/llm_chat_app/main.tf` creates the `llm_chat_app` database. Governs R6.
-- KTD5. Run `tofu plan -detailed-exitcode` immediately after `1_apply_terraform.sh` and before `2_create_test_objects.sh`. Exit code 2 fails the step. Test objects are owned by `role_service_migration` and carry owner ACLs (TRIGGER, and MAINTAIN on PG17) outside the declared grants. A plan after fixtures could report drift the fixtures caused, not the grants. (session-settled: user-approved — chosen over a single plan after `RUN_ALL_TESTS.sh`.) Governs R3.
+- KTD4. Bootstrap `admin_user` in a workflow step as the container superuser (`PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres`). Grant `LOGIN CREATEROLE CREATEDB` with the demo password from `config.yaml`, plus `GRANT pg_monitor TO admin_user WITH ADMIN OPTION`.
+  Service containers cannot run init SQL, so a `psql -v ON_ERROR_STOP=1` step is the simplest seam. `CREATEDB` is required because `examples/llm_chat_app/main.tf` creates the `llm_chat_app` database. Governs R6.
+- KTD5. Run `tofu plan -detailed-exitcode` immediately after `1_apply_terraform.sh` and before `2_create_test_objects.sh`. Exit code 2 fails the step. Test objects are owned by `role_service_migration` and carry owner ACLs (TRIGGER, and MAINTAIN on PG17) outside the declared grants.
+  A plan after fixtures could report drift the fixtures caused, not the grants. (session-settled: user-approved — chosen over a single plan after `RUN_ALL_TESTS.sh`.) Governs R3.
 - KTD6. No destroy step. The container is discarded at job end. See Deferred to Follow-Up Work. (session-settled: user-approved — chosen over running `4_cleanup.sh`.)
-- KTD7. Pin every third-party action to a full commit SHA with a `# vX` comment, and set `persist-credentials: false` on checkout. This follows the SHA-pin-plus-version-comment style of the `uses:` lines in `.github/workflows/lint.yaml` and `test.yaml`. It is the repo's first workflow with inline steps, so zizmor (pedantic persona, via trunk) is the reference for step-level rules.
+- KTD7. Pin every third-party action to a full commit SHA with a `# vX` comment, and set `persist-credentials: false` on checkout. This follows the SHA-pin-plus-version-comment style of the `uses:` lines in `.github/workflows/lint.yaml` and `test.yaml`.
+  It is the repo's first workflow with inline steps, so zizmor (pedantic persona, via trunk) is the reference for step-level rules.
 - KTD8. Install OpenTofu with `opentofu/setup-opentofu` and `tofu_wrapper: false`, so the drift step sees the raw `tofu` exit code without wrapper output handling.
 - KTD9. Escape hatch in two layers. (session-settled: user-directed — chosen over "both legs must pass to merge": let changes through, keep failures visible.) Governs R7.
   1. The integration-test check is not added to required status checks, so a red run never blocks merge.
@@ -178,7 +183,8 @@ flowchart LR
 
 - `trunk check .github/workflows/integration-test.yaml examples/llm_chat_app/config.yaml` passes (includes zizmor, actionlint, yamllint).
 - The workflow runs on both matrix legs on the PR that introduces it. Each leg is green, or red with a linked module issue and `allow_failure: true`.
-- Local parity check, optional: in a fresh checkout or after removing local `terraform.tfstate*`, run `docker run -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:17` and apply the U2 bootstrap SQL. Then, from `examples/llm_chat_app`, run `tofu init`, `./1_apply_terraform.sh`, `tofu plan -detailed-exitcode`, `./2_create_test_objects.sh`, `./3_run_verification_tests.sh`.
+- Local parity check, optional: in a fresh checkout or after removing local `terraform.tfstate*`, run `docker run -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:17` and apply the U2 bootstrap SQL.
+  Then, from `examples/llm_chat_app`, run `tofu init`, `./1_apply_terraform.sh`, `tofu plan -detailed-exitcode`, `./2_create_test_objects.sh`, `./3_run_verification_tests.sh`.
 
 ## Definition of Done
 
