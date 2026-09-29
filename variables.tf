@@ -31,7 +31,7 @@ variable "roles" {
       assume_role               = optional(string)
     })
     default_privileges = optional(list(object({
-      role        = string
+      role        = optional(string) # defaults to the parent role.name
       database    = string
       schema      = string
       owner       = string
@@ -39,31 +39,31 @@ variable "roles" {
       privileges  = list(string)
     })))
     database_grants = optional(object({
-      role        = string
+      role        = optional(string) # defaults to the parent role.name
       database    = string
       object_type = string
       privileges  = list(string)
     }))
     schema_grants = optional(list(object({
-      role        = string
+      role        = optional(string) # defaults to the parent role.name
       database    = string
       schema      = string
-      object_type = string
+      object_type = optional(string, "schema")
       privileges  = list(string)
     })))
     sequence_grants = optional(list(object({
-      role        = string
+      role        = optional(string) # defaults to the parent role.name
       database    = string
       schema      = string
-      object_type = string
+      object_type = optional(string, "sequence")
       objects     = optional(list(string))
       privileges  = list(string)
     })))
     table_grants = optional(list(object({
-      role        = string
+      role        = optional(string) # defaults to the parent role.name
       database    = string
       schema      = string
-      object_type = string
+      object_type = optional(string, "table")
       objects     = optional(list(string))
       privileges  = list(string)
     })))

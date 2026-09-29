@@ -238,3 +238,148 @@ run "custom_role_names_contains_all_roles" {
     error_message = "custom_role_names should contain role_c"
   }
 }
+
+# -----------------------------------------------------------------------------
+# Test: Grant entries that omit `role` default to the parent role's name,
+# while an explicit `role` is preserved as-is.
+# -----------------------------------------------------------------------------
+
+run "grant_role_defaults_to_parent_role_name" {
+  command = plan
+
+  providers = {
+    postgresql = postgresql.mock
+  }
+
+  variables {
+    databases = []
+    roles = [{
+      role = {
+        name = "app_owner"
+      }
+      database_grants = {
+        database    = "app_db"
+        object_type = "database"
+        privileges  = ["CONNECT"]
+      }
+      schema_grants = [{
+        database    = "app_db"
+        schema      = "app"
+        object_type = "schema"
+        privileges  = ["USAGE"]
+      }]
+      table_grants = [{
+        database    = "app_db"
+        schema      = "app"
+        object_type = "table"
+        privileges  = ["SELECT"]
+      }]
+      sequence_grants = [{
+        database    = "app_db"
+        schema      = "app"
+        object_type = "sequence"
+        privileges  = ["USAGE"]
+      }]
+      default_privileges = [{
+        database    = "app_db"
+        schema      = "app"
+        owner       = "app_owner"
+        object_type = "table"
+        privileges  = ["SELECT"]
+      }]
+      }, {
+      role = {
+        name = "other_role"
+      }
+      schema_grants = [{
+        role        = "explicit_role"
+        database    = "app_db"
+        schema      = "app"
+        object_type = "schema"
+        privileges  = ["USAGE"]
+      }]
+    }]
+  }
+
+  assert {
+    condition     = local.database_grants_map["app_owner-app_db"].role == "app_owner"
+    error_message = "database_grants.role should default to the parent role name"
+  }
+
+  assert {
+    condition     = local.schema_grants_map["app_owner-app-app_db"].role == "app_owner"
+    error_message = "schema_grants[].role should default to the parent role name"
+  }
+
+  assert {
+    condition     = local.table_grants_map["app_owner-app-app_db"].role == "app_owner"
+    error_message = "table_grants[].role should default to the parent role name"
+  }
+
+  assert {
+    condition     = local.sequence_grants_map["app_owner-app-app_db"].role == "app_owner"
+    error_message = "sequence_grants[].role should default to the parent role name"
+  }
+
+  assert {
+    condition     = local.default_privileges_map["app_owner-app_db-app-table"].role == "app_owner"
+    error_message = "default_privileges[].role should default to the parent role name"
+  }
+
+  assert {
+    condition     = local.schema_grants_map["explicit_role-app-app_db"].role == "explicit_role"
+    error_message = "An explicit grant role should be preserved, not overridden by the parent role name"
+  }
+}
+
+# -----------------------------------------------------------------------------
+# Test: schema/table/sequence grant entries that omit `object_type` default to
+# the type implied by their parent list.
+# -----------------------------------------------------------------------------
+
+run "grant_object_type_defaults_to_list_type" {
+  command = plan
+
+  providers = {
+    postgresql = postgresql.mock
+  }
+
+  variables {
+    databases = []
+    roles = [{
+      role = {
+        name = "app_reader"
+      }
+      schema_grants = [{
+        database   = "app_db"
+        schema     = "app"
+        privileges = ["USAGE"]
+      }]
+      table_grants = [{
+        database   = "app_db"
+        schema     = "app"
+        privileges = ["SELECT"]
+      }]
+      sequence_grants = [{
+        database   = "app_db"
+        schema     = "app"
+        privileges = ["USAGE"]
+      }]
+    }]
+  }
+
+  assert {
+    condition     = local.schema_grants_map["app_reader-app-app_db"].object_type == "schema"
+    error_message = "schema_grants[].object_type should default to \"schema\""
+  }
+
+  assert {
+    condition     = local.table_grants_map["app_reader-app-app_db"].object_type == "table"
+    error_message = "table_grants[].object_type should default to \"table\""
+  }
+
+  assert {
+    condition     = local.sequence_grants_map["app_reader-app-app_db"].object_type == "sequence"
+    error_message = "sequence_grants[].object_type should default to \"sequence\""
+  }
+}

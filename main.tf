@@ -13,19 +13,39 @@ locals {
     }
   )]
 
-  _default_privileges    = flatten([for role in local._roles_with_passwords : role.default_privileges if try(role.default_privileges, null) != null])
+  # Grant entries may omit `role`; when they do, it defaults to the parent role's name.
+  _default_privileges = flatten([
+    for role in local._roles_with_passwords : [
+      for grant in coalesce(role.default_privileges, []) : merge(grant, { role = coalesce(grant.role, role.role.name) })
+    ]
+  ])
   default_privileges_map = { for grant in local._default_privileges : format("%s-%s-%s-%s", grant.role, grant.database, grant.schema, grant.object_type) => grant }
 
-  _database_grants    = [for role in local._roles_with_passwords : role.database_grants if try(role.database_grants, null) != null]
+  _database_grants = [
+    for role in local._roles_with_passwords : merge(role.database_grants, { role = coalesce(role.database_grants.role, role.role.name) })
+    if try(role.database_grants, null) != null
+  ]
   database_grants_map = { for grant in local._database_grants : format("%s-%s", grant.role, grant.database) => grant }
 
-  _schema_grants    = flatten([for role in local._roles_with_passwords : coalesce(role.schema_grants, [])])
+  _schema_grants = flatten([
+    for role in local._roles_with_passwords : [
+      for grant in coalesce(role.schema_grants, []) : merge(grant, { role = coalesce(grant.role, role.role.name) })
+    ]
+  ])
   schema_grants_map = { for grant in local._schema_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
-  _sequence_grants    = flatten([for role in local._roles_with_passwords : coalesce(role.sequence_grants, [])])
+  _sequence_grants = flatten([
+    for role in local._roles_with_passwords : [
+      for grant in coalesce(role.sequence_grants, []) : merge(grant, { role = coalesce(grant.role, role.role.name) })
+    ]
+  ])
   sequence_grants_map = { for grant in local._sequence_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
-  _table_grants    = flatten([for role in local._roles_with_passwords : coalesce(role.table_grants, [])])
+  _table_grants = flatten([
+    for role in local._roles_with_passwords : [
+      for grant in coalesce(role.table_grants, []) : merge(grant, { role = coalesce(grant.role, role.role.name) })
+    ]
+  ])
   table_grants_map = { for grant in local._table_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
   databases_map = { for database in var.databases : database.name => database }
