@@ -1,7 +1,7 @@
 # Valid Schema Grants
 
 A light knowledge base for the `schema_grants` entries in this module. Schema
-grants control what a role can do *with a schema itself*. They do not grant
+grants control what a role can do _with a schema itself_. They do not grant
 access to the tables, sequences, or functions inside it. Those are handled by
 `table_grants`, `sequence_grants`, and `default_privileges`.
 
@@ -9,10 +9,10 @@ access to the tables, sequences, or functions inside it. Those are handled by
 
 PostgreSQL defines exactly two privileges at the schema level.
 
-| Privilege | What it allows                                                                       | Typical roles                          |
-| --------- | ------------------------------------------------------------------------------------ | -------------------------------------- |
-| `USAGE`   | Look up and reference objects inside the schema. Required before any table grant works. | Every role that reads or writes data   |
-| `CREATE`  | Create new objects (tables, views, sequences, functions) inside the schema.          | Migration or owner roles only          |
+| Privilege | What it allows                                                                          | Typical roles                        |
+| --------- | --------------------------------------------------------------------------------------- | ------------------------------------ |
+| `USAGE`   | Look up and reference objects inside the schema. Required before any table grant works. | Every role that reads or writes data |
+| `CREATE`  | Create new objects (tables, views, sequences, functions) inside the schema.             | Migration or owner roles only        |
 
 `ALL` is accepted by PostgreSQL as shorthand for both. Prefer listing the
 privileges explicitly so the intent is visible in the config.
@@ -42,7 +42,10 @@ above before the layer below has any effect.
 ```yaml
 schema_grants:
   # role defaults to the parent role's name
-  - { database: llm_chat_app, schema: app, object_type: schema, privileges: ["USAGE", "CREATE"] }
+  - database: llm_chat_app
+    schema: app
+    object_type: schema
+    privileges: [USAGE, CREATE]
 ```
 
 ## References

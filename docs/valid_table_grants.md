@@ -1,7 +1,7 @@
 # Valid Table Grants
 
 A light knowledge base for the `table_grants` entries in this module. Table
-grants control what a role can do *with the rows and structure of tables* in a
+grants control what a role can do _with the rows and structure of tables_ in a
 schema. They only take effect once the role already has `USAGE` on the schema
 (see [valid_schema_grants.md](./valid_schema_grants.md)) and `CONNECT` on the
 database.
@@ -10,15 +10,15 @@ database.
 
 PostgreSQL defines seven privileges at the table level.
 
-| Privilege    | What it allows                                                                                  | Typical roles                     |
-| ------------ | ----------------------------------------------------------------------------------------------- | --------------------------------- |
-| `SELECT`     | Read rows. Also required to reference columns in `UPDATE`, `DELETE`, or a `WHERE` clause.        | Every role that touches data      |
-| `INSERT`     | Add new rows.                                                                                   | Read-write and migration roles    |
-| `UPDATE`     | Change existing rows. Needs `SELECT` too in practice.                                           | Read-write and migration roles    |
-| `DELETE`     | Remove individual rows. Needs `SELECT` too in practice.                                         | Read-write and migration roles    |
-| `TRUNCATE`   | Empty the whole table in one step. Bypasses row-level `DELETE` triggers.                        | Migration and pipeline roles only |
-| `REFERENCES` | Create a foreign key that points at this table.                                                 | Migration roles only              |
-| `TRIGGER`    | Create triggers on the table.                                                                   | Migration roles only              |
+| Privilege    | What it allows                                                                            | Typical roles                     |
+| ------------ | ----------------------------------------------------------------------------------------- | --------------------------------- |
+| `SELECT`     | Read rows. Also required to reference columns in `UPDATE`, `DELETE`, or a `WHERE` clause. | Every role that touches data      |
+| `INSERT`     | Add new rows.                                                                             | Read-write and migration roles    |
+| `UPDATE`     | Change existing rows. Needs `SELECT` too in practice.                                     | Read-write and migration roles    |
+| `DELETE`     | Remove individual rows. Needs `SELECT` too in practice.                                   | Read-write and migration roles    |
+| `TRUNCATE`   | Empty the whole table in one step. Bypasses row-level `DELETE` triggers.                  | Migration and pipeline roles only |
+| `REFERENCES` | Create a foreign key that points at this table.                                           | Migration roles only              |
+| `TRIGGER`    | Create triggers on the table.                                                             | Migration roles only              |
 
 `ALL` is accepted by PostgreSQL as shorthand for all seven. Prefer listing the
 privileges explicitly so the intent is visible in the config.
@@ -64,9 +64,16 @@ backing sequence.
 ```yaml
 table_grants:
   # role defaults to the parent role's name
-  - { database: llm_chat_app, schema: app, object_type: table, privileges: ["SELECT", "INSERT", "UPDATE", "DELETE"] }
+  - database: llm_chat_app
+    schema: app
+    object_type: table
+    privileges: [SELECT, INSERT, UPDATE, DELETE]
   # restrict to specific tables
-  - { database: llm_chat_app, schema: app, object_type: table, objects: ["audit_log"], privileges: ["SELECT"] }
+  - database: llm_chat_app
+    schema: app
+    object_type: table
+    objects: [audit_log]
+    privileges: [SELECT]
 ```
 
 ## References

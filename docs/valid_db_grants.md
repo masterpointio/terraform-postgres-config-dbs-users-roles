@@ -12,11 +12,11 @@ not a list, because a role only needs one grant per database.
 
 PostgreSQL defines three privileges at the database level.
 
-| Privilege   | What it allows                                                                   | Typical roles                  |
-| ----------- | -------------------------------------------------------------------------------- | ------------------------------ |
-| `CONNECT`   | Open a session against the database. Without it every login is refused.          | Every role                     |
-| `CREATE`    | Create new schemas inside the database.                                          | Migration roles only           |
-| `TEMPORARY` | Create temporary tables for the life of a session. `TEMP` is an accepted alias.  | Migration and pipeline roles   |
+| Privilege   | What it allows                                                                  | Typical roles                |
+| ----------- | ------------------------------------------------------------------------------- | ---------------------------- |
+| `CONNECT`   | Open a session against the database. Without it every login is refused.         | Every role                   |
+| `CREATE`    | Create new schemas inside the database.                                         | Migration roles only         |
+| `TEMPORARY` | Create temporary tables for the life of a session. `TEMP` is an accepted alias. | Migration and pipeline roles |
 
 `ALL` is accepted by PostgreSQL as shorthand for all three. Prefer listing the
 privileges explicitly so the intent is visible in the config.
@@ -65,7 +65,7 @@ database_grants:
   # role defaults to the parent role's name
   database: llm_chat_app
   object_type: database
-  privileges: ["CONNECT", "CREATE", "TEMPORARY"]
+  privileges: [CONNECT, CREATE, TEMPORARY]
 ```
 
 ## References

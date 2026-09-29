@@ -128,6 +128,7 @@ module "postgres_automation" {
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 <!-- prettier-ignore-start -->
+<!-- markdownlint-disable MD060 -->
 ## Requirements
 
 | Name | Version |
@@ -201,6 +202,7 @@ module "postgres_automation" {
 | <a name="output_schema_access"></a> [schema\_access](#output\_schema\_access) | n/a |
 | <a name="output_sequence_access"></a> [sequence\_access](#output\_sequence\_access) | n/a |
 | <a name="output_table_access"></a> [table\_access](#output\_table\_access) | n/a |
+<!-- markdownlint-enable MD060 -->
 <!-- prettier-ignore-end -->
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 

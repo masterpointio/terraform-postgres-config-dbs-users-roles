@@ -11,11 +11,11 @@ database.
 
 PostgreSQL defines three privileges at the sequence level.
 
-| Privilege | What it allows                                                                 | Typical roles                   |
-| --------- | ------------------------------------------------------------------------------ | ------------------------------- |
-| `USAGE`   | Call `nextval()` and `currval()`. This is what an `INSERT` into a serial column needs. | Read-write and migration roles  |
-| `SELECT`  | Call `currval()` and read the sequence's current state with a plain `SELECT`. | Every role that touches the table |
-| `UPDATE`  | Call `nextval()` and `setval()`. `setval()` resets the counter, so this is a structural privilege. | Migration and pipeline roles    |
+| Privilege | What it allows                                                                                     | Typical roles                     |
+| --------- | -------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `USAGE`   | Call `nextval()` and `currval()`. This is what an `INSERT` into a serial column needs.             | Read-write and migration roles    |
+| `SELECT`  | Call `currval()` and read the sequence's current state with a plain `SELECT`.                      | Every role that touches the table |
+| `UPDATE`  | Call `nextval()` and `setval()`. `setval()` resets the counter, so this is a structural privilege. | Migration and pipeline roles      |
 
 `ALL` is accepted by PostgreSQL as shorthand for all three. Prefer listing the
 privileges explicitly so the intent is visible in the config.
@@ -65,11 +65,18 @@ exists** in the schema.
 ```yaml
 sequence_grants:
   # role defaults to the parent role's name
-  - { database: llm_chat_app, schema: app, object_type: sequence, privileges: ["USAGE", "SELECT", "UPDATE"] }
+  - database: llm_chat_app
+    schema: app
+    object_type: sequence
+    privileges: [USAGE, SELECT, UPDATE]
 
 default_privileges:
   # cover sequences the migration role creates later
-  - { database: llm_chat_app, schema: app, owner: role_service_migration, object_type: sequence, privileges: ["USAGE", "SELECT", "UPDATE"] }
+  - database: llm_chat_app
+    schema: app
+    owner: role_service_migration
+    object_type: sequence
+    privileges: [USAGE, SELECT, UPDATE]
 ```
 
 ## References
