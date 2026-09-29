@@ -96,13 +96,13 @@ flowchart LR
 
 ### Risks
 
-| Risk | Mitigation |
-|---|---|
+| Risk                                                                                              | Mitigation                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | PG17 leg fails on role-membership or default-privilege grants because of PG16 `CREATEROLE` rules. | This is the signal the matrix exists to catch. File a module issue and set `allow_failure: true` on that leg (KTD9). Do not make `admin_user` a superuser. |
-| Drift gate fails on a provider quirk (e.g., `revoke_public_*` grants, PG17 MAINTAIN). | Treat as a real finding: file an issue, then use `allow_failure` if it blocks the PR's intent. Do not relax `-detailed-exitcode`. |
-| `allow_failure` flags linger after the fix lands and hide regressions. | Each flag carries a comment linking its issue. The results summary still shows the failure. |
-| Negative checks in `3_run_verification_tests.sh` rely on grepping `"permission denied"`. | Stable across 15 and 17. A connection failure makes the grep miss and the check fail loudly, not pass silently. |
-| Trunk (trufflehog / zizmor) flags the hardcoded demo passwords. | They are throwaway demo values already in `config.yaml`. Add a scoped trunk-ignore if flagged. |
+| Drift gate fails on a provider quirk (e.g., `revoke_public_*` grants, PG17 MAINTAIN).             | Treat as a real finding: file an issue, then use `allow_failure` if it blocks the PR's intent. Do not relax `-detailed-exitcode`.                          |
+| `allow_failure` flags linger after the fix lands and hide regressions.                            | Each flag carries a comment linking its issue. The results summary still shows the failure.                                                                |
+| Negative checks in `3_run_verification_tests.sh` rely on grepping `"permission denied"`.          | Stable across 15 and 17. A connection failure makes the grep miss and the check fail loudly, not pass silently.                                            |
+| Trunk (trufflehog / zizmor) flags the hardcoded demo passwords.                                   | They are throwaway demo values already in `config.yaml`. Add a scoped trunk-ignore if flagged.                                                             |
 
 ### Sources
 
@@ -125,9 +125,11 @@ flowchart LR
 **Dependencies:** none
 
 **Files:**
+
 - `examples/llm_chat_app/config.yaml`
 
 **Approach:**
+
 - Add `CREATEDB` to the `CREATE ROLE admin_user ...` comment in the connection block.
 - Leave the `connection` values unchanged.
 
@@ -144,9 +146,11 @@ flowchart LR
 **Dependencies:** U1
 
 **Files:**
+
 - `.github/workflows/integration-test.yaml` (new)
 
 **Approach:**
+
 1. Header mirrors `test.yaml`: `name`, `concurrency` group, top-level `permissions: {}`. Triggers and `paths` filter per KTD1 and Assumptions.
 2. One job. Matrix entries per KTD2 and KTD9, each with `postgres` and `allow_failure: false`. Job-level `continue-on-error: ${{ matrix.allow_failure }}`, `permissions: contents: read`, `defaults.run.working-directory: examples/llm_chat_app`.
 3. Service container per KTD2.
@@ -156,6 +160,7 @@ flowchart LR
 **Patterns to follow:** `.github/workflows/test.yaml` for header, concurrency, and per-job permission comments.
 
 **Test scenarios:**
+
 - Happy path: on a PR touching `main.tf`, both legs pass the drift gate and all checks in `3_run_verification_tests.sh`. The summary shows every phase as passed.
 - Version isolation: temporarily add a step with `if: matrix.postgres == '17'` that runs `exit 1`. The 15 leg still completes and reports independently.
 - Escape hatch: with that failing step in place, set `allow_failure: true` on the 17 entry. The workflow run concludes successfully, and the 17 summary still shows the failed phase.
