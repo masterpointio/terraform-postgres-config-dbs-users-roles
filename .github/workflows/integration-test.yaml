@@ -40,11 +40,20 @@ jobs:
           # Set allow_failure: true (with a comment linking the issue) when a
           # version has a known module or provider issue. Remove it once fixed.
           # Images are pinned by digest; bump the digest to pick up new minor releases.
+          - postgres: "14"
+            image: postgres:14@sha256:c2427de38f998489d36de7ca3553db2134872c400f2b08be4b824e5c50e4d619
+            allow_failure: false
           - postgres: "15"
             image: postgres:15@sha256:724292da1f2e50bdccfc3302ce75bbba7f4a6076701b588cc795fcac65683550
             allow_failure: false
+          - postgres: "16"
+            image: postgres:16@sha256:1a6ab3f5345eb6dbe04a1349529caabdb0ab09293a09590fad07b2246bfa4b54
+            allow_failure: false
           - postgres: "17"
             image: postgres:17@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f
+            allow_failure: false
+          - postgres: "18"
+            image: postgres:18@sha256:5a5a84b19854a9ffaa54082c166ff4ec27473a361e496e5ea167f298f2da9722
             allow_failure: false
     services:
       postgres:
