@@ -41,12 +41,6 @@ jobs:
           # version has a known module or provider issue. Remove it once fixed.
           # Images are pinned to an exact MAJOR.MINOR tag plus its digest. Postgres has no
           # patch level: the minor number is the bug-fix release. Bump tag and digest together.
-          - postgres: "14"
-            image: postgres:14.24@sha256:c2427de38f998489d36de7ca3553db2134872c400f2b08be4b824e5c50e4d619
-            # Drift check fails: before PG15, PUBLIC has CREATE+USAGE on the public
-            # schema, which is owned by the bootstrap superuser. admin_user can't revoke
-            # them, so revoke_public_schema in the example re-plans on every run.
-            allow_failure: true
           - postgres: "15"
             image: postgres:15.19@sha256:724292da1f2e50bdccfc3302ce75bbba7f4a6076701b588cc795fcac65683550
             allow_failure: false
