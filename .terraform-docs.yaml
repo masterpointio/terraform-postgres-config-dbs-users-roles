@@ -12,5 +12,7 @@ output:
   mode: inject
   template: |-
     <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+    <!-- prettier-ignore-start -->
     {{ .Content }}
+    <!-- prettier-ignore-end -->
     <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
