@@ -16,9 +16,7 @@ run "role_without_roles_attribute_is_base" {
   variables {
     databases = []
     roles = [{
-      role = {
-        name = "standalone_user"
-      }
+      name = "standalone_user"
     }]
   }
 
@@ -47,10 +45,8 @@ run "role_with_only_builtin_roles_is_base" {
   variables {
     databases = []
     roles = [{
-      role = {
-        name  = "monitoring_user"
-        roles = ["pg_monitor", "pg_read_all_stats"]
-      }
+      name  = "monitoring_user"
+      roles = ["pg_monitor", "pg_read_all_stats"]
     }]
   }
 
@@ -80,15 +76,11 @@ run "role_referencing_custom_role_is_dependent" {
     databases = []
     roles = [
       {
-        role = {
-          name = "base_role"
-        }
+        name = "base_role"
       },
       {
-        role = {
-          name  = "child_role"
-          roles = ["base_role"]
-        }
+        name  = "child_role"
+        roles = ["base_role"]
       }
     ]
   }
@@ -124,15 +116,11 @@ run "role_with_builtin_and_custom_roles_is_dependent" {
     databases = []
     roles = [
       {
-        role = {
-          name = "app_role"
-        }
+        name = "app_role"
       },
       {
-        role = {
-          name  = "admin_role"
-          roles = ["pg_monitor", "app_role"]
-        }
+        name  = "admin_role"
+        roles = ["pg_monitor", "app_role"]
       }
     ]
   }
@@ -200,20 +188,14 @@ run "custom_role_names_contains_all_roles" {
     databases = []
     roles = [
       {
-        role = {
-          name = "role_a"
-        }
+        name = "role_a"
       },
       {
-        role = {
-          name = "role_b"
-        }
+        name = "role_b"
       },
       {
-        role = {
-          name  = "role_c"
-          roles = ["role_a"]
-        }
+        name  = "role_c"
+        roles = ["role_a"]
       }
     ]
   }
@@ -254,9 +236,7 @@ run "grant_role_defaults_to_parent_role_name" {
   variables {
     databases = []
     roles = [{
-      role = {
-        name = "app_owner"
-      }
+      name = "app_owner"
       database_grants = {
         database    = "app_db"
         object_type = "database"
@@ -288,9 +268,7 @@ run "grant_role_defaults_to_parent_role_name" {
         privileges  = ["SELECT"]
       }]
       }, {
-      role = {
-        name = "other_role"
-      }
+      name = "other_role"
       schema_grants = [{
         role        = "explicit_role"
         database    = "app_db"
@@ -347,9 +325,7 @@ run "grant_object_type_defaults_to_list_type" {
   variables {
     databases = []
     roles = [{
-      role = {
-        name = "app_reader"
-      }
+      name = "app_reader"
       schema_grants = [{
         database   = "app_db"
         schema     = "app"

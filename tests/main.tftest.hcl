@@ -11,10 +11,8 @@ variables {
     }]
 
     roles = [{
-        role = {
-            name = "app_user"
-            password = "app_user_password"
-        }
+        name = "app_user"
+        password = "app_user_password"
         default_privileges = [
           {
             role = "app_user"
@@ -73,9 +71,7 @@ variables {
             privileges  = ["SELECT"]
         }]
     }, {
-        role = {
-            name = "app_user2"
-        }
+        name = "app_user2"
     }]
 }
 

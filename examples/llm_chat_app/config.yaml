@@ -33,25 +33,22 @@ roles:
   # Cluster-wide roles
   # Note: admin_user (the RDS master user stored in SSM) serves as the cluster
   # admin and is used by Terraform to connect. It does not need to be created here.
-  - role:
-      name: role_pg_monitoring
-      login: false
-      inherit: true
-      roles:
-        - pg_monitor
+  - name: role_pg_monitoring
+    login: false
+    inherit: true
+    roles:
+      - pg_monitor
 
-  - role:
-      name: custom_pg_monitoring
-      login: true
-      inherit: true
-      roles:
-        - role_pg_monitoring
-      password: demo-password-monitoring
+  - name: custom_pg_monitoring
+    login: true
+    inherit: true
+    roles:
+      - role_pg_monitoring
+    password: demo-password-monitoring
 
   # Migration group role - owns all schemas and DDL
-  - role:
-      name: role_service_migration
-      login: false
+  - name: role_service_migration
+    login: false
     database_grants:
       database: llm_chat_app
       object_type: database
@@ -108,18 +105,16 @@ roles:
         }
 
   # Migration login role - inherits from migration group
-  - role:
-      name: service_migrator
-      login: true
-      inherit: true
-      roles: ["role_service_migration"]
-      connection_limit: 5
-      password: demo-password-migrator
+  - name: service_migrator
+    login: true
+    inherit: true
+    roles: ["role_service_migration"]
+    connection_limit: 5
+    password: demo-password-migrator
 
   # RW group role - read/write on app schema
-  - role:
-      name: role_service_rw
-      login: false
+  - name: role_service_rw
+    login: false
     database_grants:
       database: llm_chat_app
       object_type: database
@@ -162,9 +157,8 @@ roles:
         }
 
   # RO group role - read-only on app schema
-  - role:
-      name: role_service_ro
-      login: false
+  - name: role_service_ro
+    login: false
     database_grants:
       database: llm_chat_app
       object_type: database
@@ -200,32 +194,29 @@ roles:
         }
 
   # Login roles - app schema (inherit from rw/ro)
-  - role:
-      name: service_fastapi_rw
-      login: true
-      inherit: true
-      roles:
-        - role_service_rw
-      connection_limit: 30
-      password: demo-password-fastapi-rw
+  - name: service_fastapi_rw
+    login: true
+    inherit: true
+    roles:
+      - role_service_rw
+    connection_limit: 30
+    password: demo-password-fastapi-rw
 
-  - role:
-      name: service_fastapi_ro
-      login: true
-      inherit: true
-      roles:
-        - role_service_ro
-      connection_limit: 30
-      password: demo-password-fastapi-ro
+  - name: service_fastapi_ro
+    login: true
+    inherit: true
+    roles:
+      - role_service_ro
+    connection_limit: 30
+    password: demo-password-fastapi-ro
 
   # Pipeline login roles - ref_data schemas + inherited app access
-  - role:
-      name: service_pipeline_rw
-      login: true
-      inherit: true
-      roles: ["role_service_rw"]
-      connection_limit: 10
-      password: demo-password-pipeline-rw
+  - name: service_pipeline_rw
+    login: true
+    inherit: true
+    roles: ["role_service_rw"]
+    connection_limit: 10
+    password: demo-password-pipeline-rw
     schema_grants:
       - {
           database: llm_chat_app,
@@ -303,13 +294,12 @@ roles:
           privileges: ["EXECUTE"],
         }
 
-  - role:
-      name: service_pipeline_ro
-      login: true
-      inherit: true
-      roles: ["role_service_ro"]
-      connection_limit: 10
-      password: demo-password-pipeline-ro
+  - name: service_pipeline_ro
+    login: true
+    inherit: true
+    roles: ["role_service_ro"]
+    connection_limit: 10
+    password: demo-password-pipeline-ro
     schema_grants:
       - {
           database: llm_chat_app,
