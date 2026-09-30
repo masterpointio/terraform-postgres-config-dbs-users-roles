@@ -54,7 +54,6 @@ module "postgres_automation" {
       role        = "system_user"
       database    = "app"
       schema      = "public"
-      object_type = "table"
       objects     = [] # empty list to grant all tables
       privileges  = ["ALL"]
     }]
@@ -63,7 +62,6 @@ module "postgres_automation" {
       role        = "system_user"
       database    = "app"
       schema      = "public"
-      object_type = "schema"
       privileges  = ["USAGE", "CREATE"]
     }]
 
@@ -71,7 +69,6 @@ module "postgres_automation" {
       role        = "system_user"
       database    = "app"
       schema      = "public"
-      object_type = "sequence"
       objects     = [] # empty list to grant all sequences
       privileges  = ["ALL"]
     }]
@@ -86,7 +83,6 @@ module "postgres_automation" {
       role        = "readonly_user"
       database    = "app"
       schema      = "public"
-      object_type = "table"
       objects     = [] # empty list to grant all tables
       privileges  = ["SELECT"]
     }]
@@ -95,11 +91,11 @@ module "postgres_automation" {
       role        = "readonly_user"
       database    = "app"
       schema      = "public"
-      object_type = "sequence"
       objects     = [] # empty list to grant all sequences
       privileges  = ["USAGE", "SELECT"]
     }]
 
+    # effectively grants permissions on future obejcts - in this case, tables and sequences
     default_privileges = [
       {
         role        = "readonly_user"
