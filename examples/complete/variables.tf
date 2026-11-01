@@ -46,29 +46,29 @@ variable "databases" {
 
 variable "roles" {
   type = list(object({
-    role = object({
-      # See defaults: https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_role
-      name                      = string
-      superuser                 = optional(bool)
-      create_database           = optional(bool)
-      create_role               = optional(bool)
-      inherit                   = optional(bool)
-      login                     = optional(bool)
-      replication               = optional(bool)
-      bypass_row_level_security = optional(bool)
-      connection_limit          = optional(number)
-      encrypted_password        = optional(bool)
-      password                  = optional(string)
-      roles                     = optional(list(string))
-      search_path               = optional(list(string))
-      valid_until               = optional(string)
-      skip_drop_role            = optional(bool)
-      skip_reassign_owned       = optional(bool)
-      statement_timeout         = optional(number)
-      assume_role               = optional(string)
-    })
+    # Role attributes. See defaults: https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_role
+    name                      = string
+    superuser                 = optional(bool)
+    create_database           = optional(bool)
+    create_role               = optional(bool)
+    inherit                   = optional(bool)
+    login                     = optional(bool)
+    replication               = optional(bool)
+    bypass_row_level_security = optional(bool)
+    connection_limit          = optional(number)
+    encrypted_password        = optional(bool)
+    password                  = optional(string)
+    roles                     = optional(list(string))
+    search_path               = optional(list(string))
+    valid_until               = optional(string)
+    skip_drop_role            = optional(bool)
+    skip_reassign_owned       = optional(bool)
+    statement_timeout         = optional(number)
+    assume_role               = optional(string)
+
+    # Grants for this role. Each grant's `role` defaults to this entry's `name`.
     default_privileges = optional(list(object({
-      role        = string
+      role        = optional(string) # defaults to the parent role's name
       database    = string
       schema      = string
       owner       = string
@@ -76,35 +76,40 @@ variable "roles" {
       privileges  = list(string)
     })))
     database_grants = optional(object({
-      role        = string
+      role        = optional(string) # defaults to the parent role's name
       database    = string
       object_type = string
       privileges  = list(string)
     }))
-    schema_grants = optional(object({
-      role        = string
-      database    = string
-      schema      = string
-      object_type = string
-      privileges  = list(string)
-    }))
-    table_grants = optional(object({
-      role        = string
+    schema_grants = optional(list(object({
+      role        = optional(string) # defaults to the parent role's name
       database    = string
       schema      = string
-      object_type = string
-      objects     = list(string)
+      object_type = optional(string, "schema")
       privileges  = list(string)
-    }))
-    sequence_grants = optional(object({
-      role        = string
+    })))
+    sequence_grants = optional(list(object({
+      role        = optional(string) # defaults to the parent role's name
       database    = string
       schema      = string
-      object_type = string
-      objects     = list(string)
+      object_type = optional(string, "sequence")
+      objects     = optional(list(string))
       privileges  = list(string)
-    }))
+    })))
+    table_grants = optional(list(object({
+      role        = optional(string) # defaults to the parent role's name
+      database    = string
+      schema      = string
+      object_type = optional(string, "table")
+      objects     = optional(list(string))
+      privileges  = list(string)
+    })))
   }))
   default     = []
   description = "List of static postgres roles to create and related permissions. These are for applications that use static credentials and don't use IAM DB Auth. See defaults: https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs/resources/postgresql_role"
+
+  validation {
+    condition     = length(distinct([for role in var.roles : role.name])) == length(var.roles)
+    error_message = "Each role in var.roles must have a unique `name`."
+  }
 }

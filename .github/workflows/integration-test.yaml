@@ -1,0 +1,154 @@
+name: Integration Test
+
+# Applies examples/llm_chat_app against live Postgres servers and runs the
+# example's verification scripts. Needs no secrets, so plain pull_request is used.
+# This check is intentionally NOT a required status check: a red run must never
+# block a merge. Use a matrix entry's allow_failure flag for known issues.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "*.tf"
+      - examples/llm_chat_app/**
+      - .github/workflows/integration-test.yaml
+  pull_request:
+    paths:
+      - "*.tf"
+      - examples/llm_chat_app/**
+      - .github/workflows/integration-test.yaml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  integration-test:
+    name: postgres ${{ matrix.postgres }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: ${{ matrix.allow_failure }}
+    permissions:
+      contents: read # for checkout
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Set allow_failure: true (with a comment linking the issue) when a
+          # version has a known module or provider issue. Remove it once fixed.
+          # Images are pinned to an exact MAJOR.MINOR tag plus its digest. Postgres has no
+          # patch level: the minor number is the bug-fix release. Bump tag and digest together.
+          - postgres: "15"
+            image: postgres:15.19@sha256:724292da1f2e50bdccfc3302ce75bbba7f4a6076701b588cc795fcac65683550
+            allow_failure: false
+          - postgres: "16"
+            image: postgres:16.15@sha256:1a6ab3f5345eb6dbe04a1349529caabdb0ab09293a09590fad07b2246bfa4b54
+            allow_failure: false
+          - postgres: "17"
+            image: postgres:17.11@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f
+            allow_failure: false
+          - postgres: "18"
+            image: postgres:18.6@sha256:5a5a84b19854a9ffaa54082c166ff4ec27473a361e496e5ea167f298f2da9722
+            allow_failure: false
+    services:
+      postgres:
+        image: ${{ matrix.image }}
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: examples/llm_chat_app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: 1.9.1 # matches aqua.yaml
+          tofu_wrapper: false
+
+      # Mirrors the admin_user bootstrap documented in config.yaml.
+      - name: Bootstrap admin_user
+        id: bootstrap
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        # trunk-ignore-begin(checkov/CKV_SECRET_6): throwaway password for an ephemeral CI container
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE admin_user LOGIN CREATEROLE CREATEDB PASSWORD 'insecure-pass-for-demo-admin-user';
+          GRANT pg_monitor TO admin_user WITH ADMIN OPTION;
+          SQL
+        # trunk-ignore-end(checkov/CKV_SECRET_6)
+
+      - name: tofu init
+        id: init
+        run: tofu init -input=false
+
+      - name: Apply
+        id: apply
+        run: ./1_apply_terraform.sh
+
+      # Runs before test objects exist: their owner ACLs are outside the
+      # declared grants and would show up as drift the grants didn't cause.
+      - name: Drift check
+        id: drift
+        run: tofu plan -input=false -detailed-exitcode
+
+      - name: Create test objects
+        id: fixtures
+        run: ./2_create_test_objects.sh
+
+      - name: Run verification tests
+        id: verify
+        run: ./3_run_verification_tests.sh
+
+      - name: Write results summary
+        if: always()
+        env:
+          PG_VERSION: ${{ matrix.postgres }}
+          ALLOW_FAILURE: ${{ matrix.allow_failure }}
+          BOOTSTRAP: ${{ steps.bootstrap.outcome }}
+          INIT: ${{ steps.init.outcome }}
+          APPLY: ${{ steps.apply.outcome }}
+          DRIFT: ${{ steps.drift.outcome }}
+          FIXTURES: ${{ steps.fixtures.outcome }}
+          VERIFY: ${{ steps.verify.outcome }}
+        run: |
+          status() {
+            case "$1" in
+              success) echo "✅ passed" ;;
+              failure) echo "❌ failed" ;;
+              skipped) echo "⏭️ skipped" ;;
+              *) echo "⚪ ${1:-not run}" ;;
+            esac
+          }
+          {
+            echo "### Integration test: postgres ${PG_VERSION}"
+            echo ""
+            if [ "${ALLOW_FAILURE}" = "true" ]; then
+              echo "> [!WARNING]"
+              echo "> allow_failure is set for this version; failures here do not fail the workflow."
+              echo ""
+            fi
+            echo "| Phase | Step | Result |"
+            echo "|---|---|---|"
+            echo "| setup | bootstrap admin_user | $(status "${BOOTSTRAP}") |"
+            echo "| setup | tofu init | $(status "${INIT}") |"
+            echo "| apply | 1_apply_terraform.sh | $(status "${APPLY}") |"
+            echo "| drift | tofu plan -detailed-exitcode | $(status "${DRIFT}") |"
+            echo "| verify | 2_create_test_objects.sh | $(status "${FIXTURES}") |"
+            echo "| verify | 3_run_verification_tests.sh | $(status "${VERIFY}") |"
+          } >> "${GITHUB_STEP_SUMMARY}"

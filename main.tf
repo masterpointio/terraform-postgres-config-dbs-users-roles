@@ -1,36 +1,72 @@
 locals {
-  _roles_with_passwords = [for idx, role_data in var.roles : merge(role_data,
-    {
-      role : merge(role_data["role"],
-        lookup(role_data["role"], "password", null) != null ?
-        {
-          password : role_data["role"]["password"]
-        } :
-        {
-          password : random_password.user_password[idx].result
-        }
-      )
-    }
-  )]
+  # Roles without an explicit password get one from random_password.
+  _roles_with_passwords = [for idx, role in var.roles : merge(role, {
+    password = role.password != null ? role.password : random_password.user_password[idx].result
+  })]
 
-  _default_privileges    = flatten([for role in local._roles_with_passwords : role.default_privileges if try(role.default_privileges, null) != null])
+  # Grant entries may omit `role`; when they do, it defaults to the parent role's name.
+  _default_privileges = flatten([
+    for role in local._roles_with_passwords : [
+      for grant in coalesce(role.default_privileges, []) : merge(grant, { role = coalesce(grant.role, role.name) })
+    ]
+  ])
   default_privileges_map = { for grant in local._default_privileges : format("%s-%s-%s-%s", grant.role, grant.database, grant.schema, grant.object_type) => grant }
 
-  _database_grants    = [for role in local._roles_with_passwords : role.database_grants if try(role.database_grants, null) != null]
+  _database_grants = [
+    for role in local._roles_with_passwords : merge(role.database_grants, { role = coalesce(role.database_grants.role, role.name) })
+    if try(role.database_grants, null) != null
+  ]
   database_grants_map = { for grant in local._database_grants : format("%s-%s", grant.role, grant.database) => grant }
 
-  _schema_grants    = [for role in local._roles_with_passwords : role.schema_grants if try(role.schema_grants, null) != null]
+  _schema_grants = flatten([
+    for role in local._roles_with_passwords : [
+      for grant in coalesce(role.schema_grants, []) : merge(grant, { role = coalesce(grant.role, role.name) })
+    ]
+  ])
   schema_grants_map = { for grant in local._schema_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
-  _sequence_grants    = [for role in local._roles_with_passwords : role.sequence_grants if try(role.sequence_grants, null) != null]
+  _sequence_grants = flatten([
+    for role in local._roles_with_passwords : [
+      for grant in coalesce(role.sequence_grants, []) : merge(grant, { role = coalesce(grant.role, role.name) })
+    ]
+  ])
   sequence_grants_map = { for grant in local._sequence_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
-  _table_grants    = [for role in local._roles_with_passwords : role.table_grants if try(role.table_grants, null) != null]
+  _table_grants = flatten([
+    for role in local._roles_with_passwords : [
+      for grant in coalesce(role.table_grants, []) : merge(grant, { role = coalesce(grant.role, role.name) })
+    ]
+  ])
   table_grants_map = { for grant in local._table_grants : format("%s-%s-%s", grant.role, grant.schema, grant.database) => grant }
 
-  roles_map = { for role in local._roles_with_passwords : role.role.name => role }
-
   databases_map = { for database in var.databases : database.name => database }
+
+  # Built-in PostgreSQL roles that don't need to be created by this module
+  builtin_roles = [
+    "pg_monitor",
+    "pg_read_all_data",
+    "pg_write_all_data",
+    "pg_read_all_settings",
+    "pg_read_all_stats",
+    "pg_stat_scan_tables", "pg_signal_backend", "pg_read_server_files",
+    "pg_write_server_files", "pg_execute_server_program", "pg_checkpoint", "pg_maintain",
+    "pg_create_subscription", "pg_use_reserved_connections"
+  ]
+
+  # All custom role names being created by this module
+  custom_role_names = [for role in local._roles_with_passwords : role.name]
+
+  # Base roles: no `roles` attribute, or only referencing built-in PostgreSQL roles
+  base_roles_map = {
+    for role in local._roles_with_passwords : role.name => role
+    if try(role.roles, null) == null || alltrue([for r in coalesce(role.roles, []) : contains(local.builtin_roles, r)])
+  }
+
+  # Dependent roles: roles that reference other custom roles defined in this module
+  dependent_roles_map = {
+    for role in local._roles_with_passwords : role.name => role
+    if try(role.roles, null) != null && anytrue([for r in coalesce(role.roles, []) : contains(local.custom_role_names, r)])
+  }
 }
 
 resource "random_password" "user_password" {
@@ -51,31 +87,56 @@ resource "postgresql_database" "logical_dbs" {
   connection_limit = each.value.connection_limit
 }
 
-# In Postgres 15, now new users cannot create tables or write data to Postgres public schema by default. You have to grant create privilege to the new user manually.
-# https://www.postgresql.org/docs/current/ddl-priv.html#DDL-PRIV-CREATE
-resource "postgresql_role" "role" {
-  for_each = local.roles_map
+# Base roles: roles with no dependencies on other custom roles (created first)
+resource "postgresql_role" "base_role" {
+  for_each = local.base_roles_map
 
-  name                      = each.value.role.name
-  superuser                 = each.value.role.superuser
-  create_database           = each.value.role.create_database
-  create_role               = each.value.role.create_role
-  inherit                   = each.value.role.inherit
-  login                     = each.value.role.login
-  replication               = each.value.role.replication
-  bypass_row_level_security = each.value.role.bypass_row_level_security
-  connection_limit          = each.value.role.connection_limit
-  encrypted_password        = each.value.role.encrypted_password
-  password                  = each.value.role.password
-  roles                     = each.value.role.roles
-  search_path               = each.value.role.search_path
-  valid_until               = each.value.role.valid_until
-  skip_drop_role            = each.value.role.skip_drop_role
-  skip_reassign_owned       = each.value.role.skip_reassign_owned
-  statement_timeout         = each.value.role.statement_timeout
-  assume_role               = each.value.role.assume_role
+  name                      = each.value.name
+  superuser                 = each.value.superuser
+  create_database           = each.value.create_database
+  create_role               = each.value.create_role
+  inherit                   = each.value.inherit
+  login                     = each.value.login
+  replication               = each.value.replication
+  bypass_row_level_security = each.value.bypass_row_level_security
+  connection_limit          = each.value.connection_limit
+  encrypted_password        = each.value.encrypted_password
+  password                  = each.value.password
+  roles                     = each.value.roles
+  search_path               = each.value.search_path
+  valid_until               = each.value.valid_until
+  skip_drop_role            = each.value.skip_drop_role
+  skip_reassign_owned       = each.value.skip_reassign_owned
+  statement_timeout         = each.value.statement_timeout
+  assume_role               = each.value.assume_role
 
   depends_on = [postgresql_database.logical_dbs]
+}
+
+# Dependent roles: roles that inherit from other custom roles (created after base roles)
+resource "postgresql_role" "dependent_role" {
+  for_each = local.dependent_roles_map
+
+  name                      = each.value.name
+  superuser                 = each.value.superuser
+  create_database           = each.value.create_database
+  create_role               = each.value.create_role
+  inherit                   = each.value.inherit
+  login                     = each.value.login
+  replication               = each.value.replication
+  bypass_row_level_security = each.value.bypass_row_level_security
+  connection_limit          = each.value.connection_limit
+  encrypted_password        = each.value.encrypted_password
+  password                  = each.value.password
+  roles                     = each.value.roles
+  search_path               = each.value.search_path
+  valid_until               = each.value.valid_until
+  skip_drop_role            = each.value.skip_drop_role
+  skip_reassign_owned       = each.value.skip_reassign_owned
+  statement_timeout         = each.value.statement_timeout
+  assume_role               = each.value.assume_role
+
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.base_role]
 }
 
 resource "postgresql_default_privileges" "privileges" {
@@ -91,7 +152,7 @@ resource "postgresql_default_privileges" "privileges" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.base_role, postgresql_role.dependent_role]
 }
 
 resource "postgresql_grant" "database_access" {
@@ -102,7 +163,7 @@ resource "postgresql_grant" "database_access" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.base_role, postgresql_role.dependent_role]
 }
 
 resource "postgresql_grant" "schema_access" {
@@ -114,7 +175,7 @@ resource "postgresql_grant" "schema_access" {
   object_type = each.value.object_type
   privileges  = each.value.privileges
 
-  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.base_role, postgresql_role.dependent_role]
 }
 
 resource "postgresql_grant" "table_access" {
@@ -125,9 +186,9 @@ resource "postgresql_grant" "table_access" {
   schema      = each.value.schema
   object_type = each.value.object_type
   privileges  = each.value.privileges
-  objects     = each.value.objects
+  objects     = try(each.value.objects, null)
 
-  depends_on = [postgresql_database.logical_dbs]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.base_role, postgresql_role.dependent_role]
 }
 
 resource "postgresql_grant" "sequence_access" {
@@ -138,7 +199,8 @@ resource "postgresql_grant" "sequence_access" {
   schema      = each.value.schema
   object_type = each.value.object_type
   privileges  = each.value.privileges
+  objects     = try(each.value.objects, null)
 
-  depends_on = [postgresql_database.logical_dbs, postgresql_role.role]
+  depends_on = [postgresql_database.logical_dbs, postgresql_role.base_role, postgresql_role.dependent_role]
 }
 

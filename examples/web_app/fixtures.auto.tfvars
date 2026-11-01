@@ -20,71 +20,67 @@ databases = [
 
 roles = [
   {
-    role = {
-      name      = "fastapi_app_admin"
-      login     = true
-      superuser = false
-      password  = "insecure-pass-for-demo-fastapi-app-admin"
-    }
-    table_grants = {
+    name      = "fastapi_app_admin"
+    login     = true
+    superuser = false
+    password  = "insecure-pass-for-demo-fastapi-app-admin"
+    table_grants = [{
       role        = "fastapi_app_admin"
       database    = "web_app"
       schema      = "public"
       object_type = "table"
       objects     = [] # empty list to grant all tables
       privileges  = ["ALL"]
-    }
+    }]
 
-    schema_grants = {
+    schema_grants = [{
       role        = "fastapi_app_admin"
       database    = "web_app"
       schema      = "public"
       object_type = "schema"
       privileges  = ["USAGE", "CREATE"]
-    }
+    }]
 
-    sequence_grants = {
+    sequence_grants = [{
       role        = "fastapi_app_admin"
       database    = "web_app"
       schema      = "public"
       object_type = "sequence"
       objects     = [] # empty list to grant all sequences
       privileges  = ["ALL"]
-    }
+    }]
   },
   {
-    role = {
-      name      = "fastapi_app_writer"
-      login     = true
-      superuser = false
-      password  = "insecure-pass-for-demo-fastapi-app-writer"
-    }
+    name      = "fastapi_app_writer"
+    login     = true
+    superuser = false
+    password  = "insecure-pass-for-demo-fastapi-app-writer"
 
-    table_grants = {
+    table_grants = [{
       role        = "fastapi_app_writer"
       database    = "web_app"
       schema      = "public"
       object_type = "table"
       objects     = []      # empty list to grant all tables
       privileges  = ["ALL"] # grant all privileges on tables to the writer role
-    }
+    }]
 
-    schema_grants = {
+    schema_grants = [{
       role        = "fastapi_app_writer"
       database    = "web_app"
       schema      = "public"
       object_type = "schema"
       privileges  = ["USAGE"] # write does not have create privileges
-    }
+    }]
 
-    sequence_grants = {
+    sequence_grants = [{
       role        = "fastapi_app_writer"
       database    = "web_app"
       schema      = "public"
       object_type = "sequence"
       objects     = [] # empty list to grant all sequences
       privileges  = ["ALL"]
-    }
+    }]
 
     default_privileges = [
       {
@@ -108,30 +104,28 @@ roles = [
     ]
   },
   {
-    role = {
-      name      = "fastapi_app_reader"
-      login     = true
-      password  = "insecure-pass-for-demo-fastapi-app-reader"
-      superuser = false
-    }
+    name      = "fastapi_app_reader"
+    login     = true
+    password  = "insecure-pass-for-demo-fastapi-app-reader"
+    superuser = false
 
-    table_grants = {
+    table_grants = [{
       role        = "fastapi_app_reader"
       database    = "web_app"
       schema      = "public"
       object_type = "table"
       objects     = [] # empty list to grant all tables
       privileges  = ["SELECT"]
-    }
+    }]
 
-    sequence_grants = {
+    sequence_grants = [{
       role        = "fastapi_app_reader"
       database    = "web_app"
       schema      = "public"
       object_type = "sequence"
       objects     = [] # empty list to grant all sequences
       privileges  = ["USAGE", "SELECT"]
-    }
+    }]
 
     default_privileges = [
       {
